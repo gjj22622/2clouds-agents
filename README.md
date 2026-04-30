@@ -28,6 +28,11 @@
 - [新人導入訓練系統](docs/onboarding-training-system.md)
 - [Jacky 知識圖譜與決策層](docs/jacky-decision-layer.md)
 - [功能模組](docs/modules.md)
+- [工程師 Agent Team](docs/engineering-agent-team.md)
+- [Phase 1 工程計畫](docs/phase-1-engineering-plan.md)
+- [Domain Model](docs/domain-model.md)
+- [API / Resource Boundaries](docs/api-resource-boundaries.md)
+- [Frontend Architecture](docs/frontend-architecture.md)
 - [MVP 路線圖](docs/mvp-roadmap.md)
 - [資料來源](docs/source-context.md)
 
