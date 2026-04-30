@@ -49,6 +49,14 @@ GitHub Actions runs on every pull request and every push to `main`.
 
 Do not commit `.env`, `.env.local`, customer data, internal wiki exports, API keys, or private brand/client materials. The repository is currently public.
 
+The local brand visual system source is stored at:
+
+```text
+/home/jacky/2clouds-agents/双云行銷-品牌視覺系統
+```
+
+Keep the original `.pptx`, `.ai`, and exported brand source files local unless the repository is made private or a public-safe asset policy is agreed. App CSS may contain derived design tokens.
+
 ## Zeabur Auto Deploy
 
 Use Zeabur's GitHub integration.

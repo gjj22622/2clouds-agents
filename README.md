@@ -36,6 +36,7 @@
 - [MVP 路線圖](docs/mvp-roadmap.md)
 - [資料來源](docs/source-context.md)
 - [開發與部署流程](docs/deployment.md)
+- [品牌視覺系統導入](docs/brand-visual-system.md)
 
 ## 原則
 
