@@ -83,6 +83,47 @@ Start: npm run start
 
 Zeabur triggers a redeploy on pushes to the linked branch by default. Manual redeploy is available from the Zeabur dashboard.
 
+## Zeabur CLI
+
+Zeabur also provides an official CLI. It can deploy services, inspect deployments, read logs, restart services, and manage project/service context from the terminal.
+
+Browser login:
+
+```bash
+npx zeabur@latest auth login
+```
+
+Deploy from this repository:
+
+```bash
+npx zeabur@latest deploy
+```
+
+The deploy command auto-detects the framework and prompts you to select or create a Zeabur project.
+
+Useful commands:
+
+```bash
+npx zeabur@latest project ls
+npx zeabur@latest context set project
+npx zeabur@latest service ls
+npx zeabur@latest context set service
+npx zeabur@latest deployment get
+npx zeabur@latest deployment log -t=build
+npx zeabur@latest deployment log -t=runtime
+npx zeabur@latest service restart
+```
+
+Token login for headless or CI usage:
+
+```bash
+npx zeabur@latest auth login --token <ZEABUR_TOKEN>
+```
+
+For automated scripts, use non-interactive mode with `-i=false` and pass project/service/environment identifiers explicitly.
+
+The recommended production flow remains GitHub integration from `main`, because every push is already checked by GitHub Actions before Zeabur deploys. CLI is best for first setup, manual deploys, logs, restarts, and automation scripts.
+
 ## Environment Variables
 
 Current app only uses mock data and does not require secrets.
