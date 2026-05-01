@@ -160,6 +160,7 @@ export const memberLifecycleEvents: MemberLifecycleEvent[] = [
     brandId: "brand-muzopet",
     memberId: currentUser.id,
     assignmentId: "assignment-muzopet-newcomer",
+    fromStatus: null,
     toStatus: "active",
     eventType: "assigned",
     actorId: reviewerUser.id,

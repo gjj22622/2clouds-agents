@@ -100,6 +100,13 @@ export type NewcomerDashboard = {
   latestTraceLog?: TraceLog;
 };
 
+export type BrandOperatingStage =
+  | "onboarding"
+  | "active"
+  | "paused"
+  | "resumed"
+  | "archived";
+
 export type ClientBrand = {
   id: string;
   name: string;
@@ -111,27 +118,21 @@ export type ClientBrand = {
   primaryGoal: string;
 };
 
-export type BrandOperatingStage =
-  | "onboarding"
-  | "active"
-  | "paused"
-  | "resumed"
-  | "archived";
+// ─── Brand & Member Lifecycle ─────────────────────────────────────────────────
 
-export type BrandLifecycleEvent = {
-  id: string;
-  brandId: string;
-  fromStage?: BrandOperatingStage;
-  toStage: BrandOperatingStage;
-  eventType: "created" | "activated" | "paused" | "resumed" | "archived";
-  actorId: string;
-  occurredAt: string;
-  note?: string;
-};
+export type BrandMemberAssignmentStatus =
+  | "invited"      // 已指派但尚未完成品牌速查卡
+  | "active"       // 正常工作中
+  | "paused"       // 暫停（例如請假），任務已轉派
+  | "offboarded"   // 已離開平台，指派記錄保留
+  | "reassigned"   // 此指派已結束，任務移轉給他人（成員仍在平台）
+  | "reactivated"  // 從 paused 恢復工作
+  | "revoked";     // 舊版撤權狀態，保留給既有測試與遷移
 
-export type BrandMemberRole = "newcomer_trainee" | "reviewer" | "lead";
-
-export type BrandMemberAssignmentStatus = "active" | "paused" | "revoked";
+export type BrandMemberRole =
+  | "newcomer_trainee"  // 新人，只看自己的任務
+  | "reviewer"          // 品管員，看全品牌任務
+  | "lead";             // 資深成員，可建立任務與訊號
 
 export type BrandMemberAssignment = {
   id: string;
@@ -142,6 +143,26 @@ export type BrandMemberAssignment = {
   assignedAt: string;
   assignedBy: string;
   validUntil?: string;
+  pausedAt?: string;
+  pausedReason?: string;
+  resumedAt?: string;
+  offboardedAt?: string;
+  offboardedReason?: string;
+  reassignedTo?: string;    // 任務轉派對象 userId
+  updatedAt?: string;
+};
+
+export type BrandLifecycleEvent = {
+  id: string;
+  brandId: string;
+  fromStage: BrandOperatingStage | null;  // null = 品牌初建
+  toStage: BrandOperatingStage;
+  eventType: "created" | "activated" | "paused" | "resumed" | "archived";
+  actorId: string;
+  reason?: string;
+  note?: string;
+  createdAt?: string;
+  occurredAt?: string;
 };
 
 export type MemberLifecycleEvent = {
@@ -149,12 +170,22 @@ export type MemberLifecycleEvent = {
   brandId: string;
   memberId: string;
   assignmentId: string;
-  fromStatus?: BrandMemberAssignmentStatus;
+  fromStatus: BrandMemberAssignmentStatus | null;
   toStatus: BrandMemberAssignmentStatus;
-  eventType: "assigned" | "paused" | "resumed" | "revoked";
+  eventType:
+    | "assigned"
+    | "paused"
+    | "resumed"
+    | "revoked"
+    | "offboarded"
+    | "reassigned"
+    | "reactivated";
   actorId: string;
-  occurredAt: string;
+  createdAt?: string;
+  occurredAt?: string;
   note?: string;
+  reason?: string;
+  taskReassignments?: Array<{ taskId: string; newOwnerId: string }>;
 };
 
 export type BrandBrain = {

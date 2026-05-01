@@ -15,6 +15,7 @@ import type {
   BrandOperatingContext,
   BrandOperatingStage,
   BrandTaskStatus,
+  ClientBrand,
   RevenueSignal,
   SeniorMemberActivity,
 } from "@/lib/domain";
@@ -26,8 +27,8 @@ const stageLabels: Record<BrandOperatingStage, string> = {
   onboarding: "導入中",
   active: "營運中",
   paused: "暫停",
-  resumed: "已恢復",
-  archived: "已封存",
+  resumed: "恢復中",
+  archived: "封存",
 };
 
 const brandTaskStatusLabels: Record<BrandTaskStatus, string> = {
