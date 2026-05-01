@@ -1,17 +1,11 @@
 import { notFound } from "next/navigation";
+import { getRevenueSignalsForBrandTask } from "@/lib/brands";
+import { brandOpsStore } from "@/lib/brand-ops-store";
 import {
-  buildBrandOperatingContext,
-  getRevenueSignalsForBrandTask,
-} from "@/lib/brands";
-import {
-  brandBrains,
-  brandTasks,
-  clientBrands,
   currentUser,
-  revenueSignals,
   reviewerUser,
-  seniorMemberActivities,
 } from "@/lib/seed";
+import { BrandOpsPanel } from "@/components/BrandOpsPanel";
 
 const users = [currentUser, reviewerUser];
 
@@ -41,15 +35,7 @@ export default async function BrandDetailPage({
 
   let context;
   try {
-    context = buildBrandOperatingContext({
-      brandId: id,
-      brands: clientBrands,
-      brandBrains,
-      brandTasks,
-      revenueSignals,
-      seniorMemberActivities,
-      users,
-    });
+    context = brandOpsStore.getBrandOperatingContext(id);
   } catch {
     notFound();
   }
@@ -239,6 +225,8 @@ export default async function BrandDetailPage({
             ))}
           </div>
         </section>
+
+        <BrandOpsPanel brandId={context.brand.id} tasks={context.tasks} />
       </aside>
     </div>
   );
