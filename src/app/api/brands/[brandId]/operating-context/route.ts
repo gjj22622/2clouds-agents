@@ -1,14 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  brandBrains,
-  brandTasks,
-  clientBrands,
-  revenueSignals,
-  currentUser,
-  reviewerUser,
-  seniorMemberActivities,
-} from "@/lib/seed";
-import { buildBrandOperatingContext } from "@/lib/brands";
+import { brandOpsStore } from "@/lib/brand-ops-store";
 
 export async function GET(
   _request: Request,
@@ -17,17 +8,7 @@ export async function GET(
   const { brandId } = await params;
 
   try {
-    return NextResponse.json(
-      buildBrandOperatingContext({
-        brandId,
-        brands: clientBrands,
-        brandBrains,
-        brandTasks,
-        revenueSignals,
-        seniorMemberActivities,
-        users: [currentUser, reviewerUser],
-      }),
-    );
+    return NextResponse.json(brandOpsStore.getBrandOperatingContext(brandId));
   } catch (error) {
     return NextResponse.json(
       {
