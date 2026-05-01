@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Navigation } from "@/components/Navigation";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "2clouds Agents",
   description: "双云 AI 行銷部訓練與營運平台",
 };
-
-const navItems = [
-  { href: "/", label: "Cockpit" },
-  { href: "/training/tasks", label: "Training Tasks" },
-  { href: "/brains", label: "Brains" },
-  { href: "/knowledge-graph", label: "Knowledge Graph" },
-];
 
 export default function RootLayout({
   children,
@@ -27,13 +21,7 @@ export default function RootLayout({
             <Link className="brand" href="/">
               双云 AI 行銷部
             </Link>
-            <nav className="nav" aria-label="Main navigation">
-              {navItems.map((item) => (
-                <Link key={item.href} href={item.href}>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <Navigation />
           </header>
           <main className="main">{children}</main>
         </div>

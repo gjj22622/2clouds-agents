@@ -42,72 +42,87 @@ export function TaskWorkspace({
   }
 
   return (
-    <section className="section">
-      <div className="section-header">
-        <div>
-          <div className="eyebrow">Stage {task.stage} · {task.module}</div>
-          <h1>{task.title}</h1>
-          <p>{task.brief}</p>
-        </div>
-        <span className={`badge ${status}`}>{statusLabels[status]}</span>
-      </div>
-
-      <div className="stack" style={{ marginTop: 18 }}>
-        {reviewerNote && status === "needs_revision" && (
-          <div className="reviewer-note">
-            <h2>Reviewer 意見</h2>
-            <p>{reviewerNote}</p>
+    <div className="stack">
+      <section className="section">
+        <header className="section-header">
+          <div>
+            <div className="eyebrow">Stage {task.stage} · {task.module}</div>
+            <h1>{task.title}</h1>
+            <p style={{ fontSize: "16px" }}>{task.brief}</p>
           </div>
-        )}
+          <span className={`badge ${status}`} style={{ fontSize: "14px", padding: "6px 12px" }}>
+            {statusLabels[status]}
+          </span>
+        </header>
 
-        <div>
-          <h2>交付標準</h2>
-          <p>{task.expectedOutput}</p>
-        </div>
-
-        <div>
-          <h2>任務狀態</h2>
-          {availableStatuses.length > 0 ? (
-            <div className="button-row">
-              {availableStatuses.map((targetStatus) => (
-                <button
-                  className="button"
-                  key={targetStatus}
-                  onClick={() => moveTo(targetStatus)}
-                  type="button"
-                >
-                  標記為{statusLabels[targetStatus]}
-                </button>
-              ))}
+        <div className="stack" style={{ marginTop: 32 }}>
+          {reviewerNote && status === "needs_revision" && (
+            <div className="reviewer-note">
+              <h2>Reviewer 意見</h2>
+              <p>{reviewerNote}</p>
             </div>
-          ) : (
-            <div className="empty">此任務目前沒有可操作的下一個狀態。</div>
           )}
-        </div>
 
-        <div>
-          <h2>Trace log</h2>
-          {logs.length === 0 ? (
-            <div className="empty">尚無操作記錄。</div>
-          ) : (
-            <div className="card-list">
-              {logs.map((log) => (
-                <div className="trace-row" key={log.id}>
+          <div className="decision-block">
+            <h2 style={{ fontSize: "18px", marginBottom: 12 }}>交付標準</h2>
+            <div className="section" style={{ background: "var(--sy-paper)", borderStyle: "dashed", boxShadow: "none" }}>
+              <p style={{ color: "var(--sy-ink)", fontWeight: 500 }}>{task.expectedOutput}</p>
+            </div>
+          </div>
+
+          <div className="decision-block">
+            <h2 style={{ fontSize: "18px", marginBottom: 12 }}>任務狀態更新</h2>
+            {availableStatuses.length > 0 ? (
+              <div className="button-row">
+                {availableStatuses.map((targetStatus) => (
+                  <button
+                    className="button"
+                    key={targetStatus}
+                    onClick={() => moveTo(targetStatus)}
+                    type="button"
+                  >
+                    標記為 {statusLabels[targetStatus]}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="empty">此任務目前沒有可由新人操作的下一個狀態。</div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2 style={{ fontSize: "18px", marginBottom: 16 }}>Trace log</h2>
+        <div className="stack" style={{ gap: 12 }}>
+          {logs.length > 0 ? (
+            logs.map((log) => (
+              <div className="trace-row" key={log.id} style={{ background: "var(--sy-paper)", border: "none" }}>
+                <div className="meta-row" style={{ justifyContent: "space-between" }}>
                   <div className="meta-row">
-                    <span className="badge">{log.action}</span>
-                    {log.fromStatus && log.toStatus && (
-                      <span className="badge">
-                        {statusLabels[log.fromStatus]} → {statusLabels[log.toStatus]}
+                    <span className="badge" style={{ background: "var(--sy-ink)", color: "white" }}>{log.action}</span>
+                    {log.fromStatus && (
+                      <span className="badge" style={{ background: "var(--sy-line)" }}>
+                        {statusLabels[log.fromStatus]} → {log.toStatus ? statusLabels[log.toStatus] : ""}
                       </span>
                     )}
                   </div>
-                  <p>{new Date(log.createdAt).toLocaleString("zh-TW")}</p>
+                  <time style={{ fontSize: "12px", color: "var(--sy-gray)" }}>
+                    {new Date(log.createdAt).toLocaleString("zh-TW", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </time>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))
+          ) : (
+            <div className="empty" style={{ minHeight: "60px" }}>尚無操作紀錄</div>
           )}
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
