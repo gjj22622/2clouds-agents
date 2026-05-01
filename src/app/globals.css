@@ -414,80 +414,113 @@ p:last-child {
   background: var(--surface);
   margin: -32px;
   min-height: calc(100vh - 64px);
-  padding: 32px;
+  padding: 0;
+  display: flex;
+}
+
+.brand-app-sidebar {
+  width: 280px;
+  background: var(--sy-paper);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  padding: 32px 24px;
+}
+
+.brand-app-main {
+  flex: 1;
+  padding: 32px 40px;
+  overflow-y: auto;
 }
 
 .command-center-header {
   background: var(--sy-deep);
   border: none;
   color: white;
+  padding: 40px 32px;
+  border-radius: var(--radius);
+  margin-bottom: 32px;
 }
 
 .command-center-header .eyebrow {
   color: var(--sy-teal);
+  font-weight: 800;
+  letter-spacing: 0.1em;
 }
 
 .command-center-header h1 {
   color: white;
   margin-bottom: 8px;
+  font-size: 36px;
 }
 
 .command-center-header p {
   color: var(--sy-mist);
   max-width: 600px;
+  font-size: 16px;
 }
 
 .brand-sub-nav {
-  border-bottom: 2px solid var(--sy-mist);
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 32px;
-  padding-bottom: 20px;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 32px;
 }
 
-.brand-sub-nav nav {
-  margin-bottom: -21px;
-}
-
-.brand-sub-nav nav span, 
-.brand-sub-nav nav a {
+.brand-sub-nav a,
+.brand-sub-nav span {
   cursor: pointer;
-  padding: 12px 20px;
+  padding: 10px 16px;
+  border-radius: 6px;
   color: var(--text-muted);
   font-weight: 600;
   font-size: 14px;
+  transition: all 0.2s ease;
 }
 
-.brand-sub-nav nav span.active,
-.brand-sub-nav nav a.active {
-  border-bottom: 3px solid var(--primary);
+.brand-sub-nav a:hover,
+.brand-sub-nav span:hover {
+  background: var(--sy-cloud);
   color: var(--primary);
+}
+
+.brand-sub-nav a.active,
+.brand-sub-nav span.active {
+  background: var(--sy-mist);
+  color: var(--primary-strong);
 }
 
 .signal-card {
   background: white;
   border: 1px solid var(--sy-line);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
 }
 
 .signal-label {
   color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
 }
 
 .signal-value {
   color: var(--sy-ink);
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 800;
+  line-height: 1;
 }
 
 .signal-trend {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .signal-trend.positive {
@@ -499,8 +532,19 @@ p:last-child {
 }
 
 .isolated-section {
-  border: 2px solid var(--sy-mist);
-  box-shadow: none;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.brand-badge {
+  background: var(--sy-mist);
+  color: var(--primary-strong);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 .button,

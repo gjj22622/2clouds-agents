@@ -24,53 +24,71 @@ const mockBrands = [
 ];
 
 export default function BrandsPage() {
+  const totalTasks = mockBrands.reduce((acc, b) => acc + b.taskCount, 0);
+
   return (
-    <div className="stack" style={{ gap: "32px" }}>
+    <div className="stack" style={{ gap: "40px" }}>
       <header className="section command-center-header">
-        <div className="eyebrow">2clouds Command Center</div>
-        <h1>品牌目錄管理</h1>
+        <div className="eyebrow">Portfolio Overview</div>
+        <h1>2clouds Command Center</h1>
         <p>
-          管理所有客戶品牌的獨立營運空間。監控各品牌進度、成員指派與系統健康狀態。
+          集中管理所有客戶品牌的獨立營運空間。在此監控各品牌交付進度、成員分配與營收訊號。
         </p>
+        
+        <div className="metric-grid" style={{ marginTop: "32px", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "32px" }}>
+          <div className="metric" style={{ background: "rgba(255,255,255,0.05)", border: "none", color: "white" }}>
+            <span className="metric-label" style={{ color: "var(--sy-mist)" }}>總管理品牌</span>
+            <span className="metric-value" style={{ color: "white" }}>{mockBrands.length}</span>
+          </div>
+          <div className="metric" style={{ background: "rgba(255,255,255,0.05)", border: "none", color: "white" }}>
+            <span className="metric-label" style={{ color: "var(--sy-mist)" }}>進行中任務</span>
+            <span className="metric-value" style={{ color: "white" }}>{totalTasks}</span>
+          </div>
+          <div className="metric" style={{ background: "rgba(255,255,255,0.05)", border: "none", color: "white" }}>
+            <span className="metric-label" style={{ color: "var(--sy-mist)" }}>系統健康度</span>
+            <span className="metric-value" style={{ color: "var(--sy-teal)" }}>Optimal</span>
+          </div>
+        </div>
       </header>
 
-      <div className="card-list" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", display: "grid", gap: "24px" }}>
+      <div className="card-list" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", display: "grid", gap: "32px" }}>
         {mockBrands.map((brand) => (
-          <div className="task-card" key={brand.id} style={{ padding: 0, overflow: "hidden" }}>
-            <div style={{ padding: "20px", borderBottom: "1px solid var(--line)" }}>
-              <div className="section-header" style={{ marginBottom: 12 }}>
+          <div className="task-card" key={brand.id} style={{ padding: 0, overflow: "hidden", border: "1px solid var(--line)" }}>
+            <div style={{ padding: "24px", borderBottom: "1px solid var(--line)" }}>
+              <div className="section-header" style={{ marginBottom: 16 }}>
                 <div>
-                  <div className="eyebrow">{brand.industry}</div>
-                  <h2 style={{ fontSize: "18px", margin: 0 }}>{brand.name}</h2>
+                  <div className="brand-badge">{brand.industry}</div>
+                  <h2 style={{ fontSize: "20px", margin: "8px 0 0 0", color: "var(--sy-ink)" }}>{brand.name}</h2>
                 </div>
                 <span className={`badge ${brand.status === "active" ? "reviewed" : "in_progress"}`}>
                   {brand.status}
                 </span>
               </div>
-              <div className="meta-row" style={{ gap: "12px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                  <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>核心成員:</span>
-                  <div className="meta-row" style={{ gap: "4px" }}>
-                    {brand.members.map(m => (
-                      <span key={m} className="badge" style={{ fontSize: "10px", padding: "2px 6px" }}>{m}</span>
-                    ))}
-                  </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 700 }}>核心成員:</span>
+                <div className="meta-row" style={{ gap: "6px" }}>
+                  {brand.members.map(m => (
+                    <span key={m} className="badge" style={{ fontSize: "11px" }}>{m}</span>
+                  ))}
                 </div>
               </div>
             </div>
             
-            <div style={{ padding: "16px 20px", background: "var(--sy-paper)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", gap: "16px" }}>
+            <div style={{ padding: "16px 24px", background: "var(--sy-paper)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", gap: "24px" }}>
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 700 }}>任務</div>
-                  <div style={{ fontSize: "16px", fontWeight: 800 }}>{brand.taskCount}</div>
+                  <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 800, textTransform: "uppercase" }}>Tasks</div>
+                  <div style={{ fontSize: "18px", fontWeight: 800, color: "var(--sy-deep)" }}>{brand.taskCount}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 700 }}>健康度</div>
-                  <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--success)" }}>{brand.health}</div>
+                  <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 800, textTransform: "uppercase" }}>Health</div>
+                  <div style={{ fontSize: "14px", fontWeight: 800, color: "var(--success)", display: "flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "currentColor" }}></span>
+                    {brand.health}
+                  </div>
                 </div>
               </div>
-              <Link className="button" href={`/brands/${brand.id}`} style={{ minHeight: "36px", fontSize: "13px" }}>
+              <Link className="button" href={`/brands/${brand.id}`} style={{ minHeight: "38px", padding: "0 16px" }}>
                 進入品牌 App
               </Link>
             </div>
