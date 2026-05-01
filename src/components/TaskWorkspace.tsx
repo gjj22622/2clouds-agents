@@ -48,30 +48,37 @@ export function TaskWorkspace({
           <div>
             <div className="eyebrow">Stage {task.stage} · {task.module}</div>
             <h1>{task.title}</h1>
-            <p style={{ fontSize: "16px" }}>{task.brief}</p>
+            <p style={{ fontSize: "16px", maxWidth: "600px" }}>{task.brief}</p>
           </div>
-          <span className={`badge ${status}`} style={{ fontSize: "14px", padding: "6px 12px" }}>
-            {statusLabels[status]}
-          </span>
+          <div className="stack" style={{ alignItems: "flex-end", gap: "8px" }}>
+            <span className={`badge ${status}`} style={{ fontSize: "14px", padding: "6px 12px" }}>
+              {statusLabels[status]}
+            </span>
+            {status === "needs_revision" && (
+              <span style={{ fontSize: "12px", color: "var(--danger)", fontWeight: 700 }}>待修正</span>
+            )}
+            {status === "reviewed" && (
+              <span style={{ fontSize: "12px", color: "var(--success)", fontWeight: 700 }}>已通過認證</span>
+            )}
+          </div>
         </header>
 
         <div className="stack" style={{ marginTop: 32 }}>
-          {reviewerNote && status === "needs_revision" && (
-            <div className="reviewer-note">
-              <h2>Reviewer 意見</h2>
+          {reviewerNote && (status === "needs_revision" || status === "reviewed") && (
+            <div className="reviewer-note" style={{ marginBottom: "8px" }}>
               <p>{reviewerNote}</p>
             </div>
           )}
 
           <div className="decision-block">
-            <h2 style={{ fontSize: "18px", marginBottom: 12 }}>交付標準</h2>
-            <div className="section" style={{ background: "var(--sy-paper)", borderStyle: "dashed", boxShadow: "none" }}>
-              <p style={{ color: "var(--sy-ink)", fontWeight: 500 }}>{task.expectedOutput}</p>
+            <h2 style={{ fontSize: "16px", color: "var(--sy-gray)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>交付標準</h2>
+            <div className="section" style={{ background: "var(--sy-paper)", borderStyle: "dashed", boxShadow: "none", padding: "16px 20px" }}>
+              <p style={{ color: "var(--sy-ink)", fontWeight: 500, fontSize: "15px" }}>{task.expectedOutput}</p>
             </div>
           </div>
 
           <div className="decision-block">
-            <h2 style={{ fontSize: "18px", marginBottom: 12 }}>任務狀態更新</h2>
+            <h2 style={{ fontSize: "16px", color: "var(--sy-gray)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>狀態操作</h2>
             {availableStatuses.length > 0 ? (
               <div className="button-row">
                 {availableStatuses.map((targetStatus) => (
@@ -79,6 +86,7 @@ export function TaskWorkspace({
                     className="button"
                     key={targetStatus}
                     onClick={() => moveTo(targetStatus)}
+                    style={{ background: targetStatus === "submitted" ? "var(--sy-deep)" : undefined }}
                     type="button"
                   >
                     標記為 {statusLabels[targetStatus]}
@@ -86,40 +94,50 @@ export function TaskWorkspace({
                 ))}
               </div>
             ) : (
-              <div className="empty">此任務目前沒有可由新人操作的下一個狀態。</div>
+              <div className="empty" style={{ minHeight: "80px" }}>
+                <p>目前沒有可操作的狀態更新。請等待 Reviewer 審核或聯繫 Jacky。</p>
+              </div>
             )}
           </div>
         </div>
       </section>
 
-      <section className="section">
-        <h2 style={{ fontSize: "18px", marginBottom: 16 }}>Trace log</h2>
-        <div className="stack" style={{ gap: 12 }}>
+      <section className="section" style={{ paddingBottom: "40px" }}>
+        <h2 style={{ fontSize: "18px", marginBottom: 24 }}>活動紀錄 (Trace Log)</h2>
+        <div className="trace-list">
           {logs.length > 0 ? (
-            logs.map((log) => (
-              <div className="trace-row" key={log.id} style={{ background: "var(--sy-paper)", border: "none" }}>
-                <div className="meta-row" style={{ justifyContent: "space-between" }}>
-                  <div className="meta-row">
-                    <span className="badge" style={{ background: "var(--sy-ink)", color: "white" }}>{log.action}</span>
-                    {log.fromStatus && (
-                      <span className="badge" style={{ background: "var(--sy-line)" }}>
-                        {statusLabels[log.fromStatus]} → {log.toStatus ? statusLabels[log.toStatus] : ""}
-                      </span>
-                    )}
+            logs.map((log, index) => (
+              <div className={`trace-row ${index === 0 ? "active" : ""}`} key={log.id}>
+                <div className="trace-content">
+                  <div className="trace-meta">
+                    <span className="trace-label">
+                      {log.action === "task_status_changed" ? "狀態變更" : log.action}
+                    </span>
+                    <time className="trace-time">
+                      {new Date(log.createdAt).toLocaleString("zh-TW", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </time>
                   </div>
-                  <time style={{ fontSize: "12px", color: "var(--sy-gray)" }}>
-                    {new Date(log.createdAt).toLocaleString("zh-TW", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </time>
+                  {log.fromStatus && (
+                    <div className="meta-row" style={{ gap: "4px" }}>
+                      <span className="badge" style={{ fontSize: "11px", padding: "2px 6px" }}>
+                        {statusLabels[log.fromStatus]}
+                      </span>
+                      <span style={{ fontSize: "11px", color: "var(--sy-gray)" }}>→</span>
+                      <span className={`badge ${log.toStatus}`} style={{ fontSize: "11px", padding: "2px 6px" }}>
+                        {log.toStatus ? statusLabels[log.toStatus] : ""}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
           ) : (
-            <div className="empty" style={{ minHeight: "60px" }}>尚無操作紀錄</div>
+            <div className="empty" style={{ minHeight: "60px", border: "none" }}>尚無操作紀錄</div>
           )}
         </div>
       </section>
