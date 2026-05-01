@@ -161,7 +161,7 @@ export const traceLogs: TraceLog[] = [
     id: "trace-001",
     assignmentId: "assignment-context-brief",
     actorId: currentUser.id,
-    action: "task_status_changed",
+    action: "review_created",
     fromStatus: "submitted",
     toStatus: "reviewed",
     createdAt: "2026-04-30T08:30:00.000Z",

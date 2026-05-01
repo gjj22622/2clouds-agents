@@ -1,30 +1,24 @@
 import { CertificationSummary } from "@/components/CertificationSummary";
 import { DecisionPanel } from "@/components/DecisionPanel";
 import { TaskCard } from "@/components/TaskCard";
-import { calculateCertificationProgress } from "@/lib/training";
 import {
   currentUser,
   decisionPrompts,
   taskAssignments,
+  traceLogs,
   trainingTasks,
 } from "@/lib/seed";
+import { buildNewcomerDashboard } from "@/lib/training";
 
 export default function CockpitPage() {
-  const progress = calculateCertificationProgress({
-    userId: currentUser.id,
+  const dashboard = buildNewcomerDashboard({
+    user: currentUser,
     targetPoints: 60,
     assignments: taskAssignments,
     tasks: trainingTasks,
+    decisionPrompts,
+    traceLogs,
   });
-  const activeAssignment =
-    taskAssignments.find((assignment) => assignment.status === "in_progress") ??
-    taskAssignments[0];
-  const activeTask = trainingTasks.find(
-    (task) => task.id === activeAssignment.taskId,
-  )!;
-  const decisionPrompt = decisionPrompts.find(
-    (prompt) => prompt.taskId === activeTask.id,
-  )!;
 
   return (
     <div className="page-grid">
@@ -38,7 +32,7 @@ export default function CockpitPage() {
           </p>
         </section>
 
-        <CertificationSummary progress={progress} />
+        <CertificationSummary progress={dashboard.progress} />
 
         <section className="section">
           <div className="section-header">
@@ -48,10 +42,7 @@ export default function CockpitPage() {
             </div>
           </div>
           <div className="card-list">
-            {taskAssignments.map((assignment) => {
-              const task = trainingTasks.find(
-                (candidate) => candidate.id === assignment.taskId,
-              )!;
+            {dashboard.assignments.map(({ assignment, task }) => {
               return (
                 <TaskCard
                   assignment={assignment}
@@ -64,7 +55,10 @@ export default function CockpitPage() {
         </section>
       </div>
 
-      <DecisionPanel decisionPrompt={decisionPrompt} task={activeTask} />
+      <DecisionPanel
+        decisionPrompt={dashboard.decisionPrompt}
+        task={dashboard.activeTask}
+      />
     </div>
   );
 }

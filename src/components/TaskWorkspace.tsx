@@ -9,8 +9,8 @@ import type {
   User,
 } from "@/lib/domain";
 import {
+  applyTaskStatusTransition,
   canTransitionTaskStatus,
-  createStatusTraceLog,
 } from "@/lib/training";
 import { statusLabels } from "./status";
 
@@ -40,14 +40,13 @@ export function TaskWorkspace({
   );
 
   function moveTo(toStatus: TaskStatus) {
-    const log = createStatusTraceLog({
-      assignmentId: assignment.id,
+    const result = applyTaskStatusTransition({
+      assignment: { ...assignment, status },
       actorId: user.id,
-      fromStatus: status,
       toStatus,
     });
-    setStatus(toStatus);
-    setLogs((current) => [log, ...current]);
+    setStatus(result.assignment.status);
+    setLogs((current) => [result.traceLog, ...current]);
   }
 
   return (

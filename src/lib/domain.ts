@@ -77,3 +77,18 @@ export type CertificationProgress = {
   submittedPoints: number;
   percent: number;
 };
+
+export type TrainingTaskAssignmentSummary = {
+  assignment: TrainingTaskAssignment;
+  task: TrainingTask;
+};
+
+export type NewcomerDashboard = {
+  user: User;
+  progress: CertificationProgress;
+  assignments: TrainingTaskAssignmentSummary[];
+  activeAssignment: TrainingTaskAssignment;
+  activeTask: TrainingTask;
+  decisionPrompt: DecisionPrompt;
+  latestTraceLog?: TraceLog;
+};
