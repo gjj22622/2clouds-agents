@@ -22,6 +22,7 @@ const stageLabels = {
   onboarding: "導入中",
   active: "營運中",
   paused: "暫停",
+  archived: "歸檔",
 } as const;
 
 const brandTaskStatusLabels: Record<BrandTaskStatus, string> = {
@@ -403,18 +404,21 @@ function safeBuildBrandContexts(): BrandOperatingContext[] {
 
 function buildBrandCardFromContext(context: BrandOperatingContext) {
   const isFeatured = context.brand.id === MUZO_BRAND_ID;
+  const stage = context.brand.operatingStage;
   return {
     id: context.brand.id,
     href: `/brands/${context.brand.id}`,
     name: context.brand.name,
     industry: context.brand.industry,
-    statusLabel: stageLabels[context.brand.operatingStage],
+    statusLabel: stageLabels[stage] || stage,
     statusTone:
-      context.brand.operatingStage === "active"
+      stage === "active"
         ? ("reviewed" as const)
-        : context.brand.operatingStage === "onboarding"
+        : stage === "onboarding"
           ? ("in_progress" as const)
-          : ("not_started" as const),
+          : stage === "paused"
+            ? ("paused" as const)
+            : ("archived" as const),
     summary: isFeatured
       ? muzoDirectoryFallback.summary
       : context.brand.positioning,
@@ -566,198 +570,194 @@ function formatActivityTime(iso: string) {
 }
 
 function GenericBrandWorkspace({ context }: { context: BrandOperatingContext }) {
+  const isFrozen = context.brand.operatingStage === "paused";
+
   return (
-    <div className="page-grid">
-      <div className="stack">
-        <header className="section">
-          <div className="section-header">
-            <div>
-              <div className="eyebrow">Brand App · {context.brand.id}</div>
-              <h1>{context.brand.name}</h1>
-              <p>{context.brand.positioning}</p>
-            </div>
-            <span className="badge reviewed">
-              {stageLabels[context.brand.operatingStage]}
-            </span>
-          </div>
+    <div className="brand-app-shell">
+      <aside className="brand-app-sidebar">
+        <div style={{ marginBottom: "32px" }}>
+          <Link href="/brands" className="badge" style={{ background: "var(--sy-mist)", color: "var(--primary-strong)", fontWeight: 800, cursor: "pointer", display: "inline-block", marginBottom: "16px" }}>
+            ← COMMAND CENTER
+          </Link>
+          <div className="brand-badge" style={{ marginBottom: "8px" }}>Brand App · {context.brand.id}</div>
+          <span className={`badge ${context.brand.operatingStage === "active" ? "reviewed" : context.brand.operatingStage}`} style={{ marginBottom: 12 }}>
+            {stageLabels[context.brand.operatingStage]}
+          </span>
+          <h1 style={{ margin: 0, fontSize: "24px", lineHeight: 1.2 }}>{context.brand.name}</h1>
+        </div>
 
-          <div className="metric-grid">
-            <div className="metric">
-              <span className="metric-value">{context.assignedMembers.length}</span>
-              <span className="metric-label">指派成員</span>
-            </div>
-            <div className="metric">
-              <span className="metric-value">{context.tasks.length}</span>
-              <span className="metric-label">日常任務</span>
-            </div>
-            <div className="metric">
-              <span className="metric-value">{context.revenueSignals.length}</span>
-              <span className="metric-label">營收訊號</span>
-            </div>
-          </div>
-        </header>
+        <nav className="brand-module-nav">
+          <span className="active">Dashboard Overview</span>
+          <span>Brand Brain Wiki</span>
+          <span>Product Intelligence</span>
+          <span>Daily Tasks</span>
+          <span>Performance Logs</span>
+        </nav>
 
-        <section className="section">
-          <div className="section-header">
-            <div>
-              <div className="eyebrow">Brand Brain</div>
-              <h2>品牌腦模組</h2>
-              <p>此區只載入 {context.brand.name} 的品牌腦，不與其他品牌共用。</p>
-            </div>
-          </div>
+        <Link className="secondary-button" href="/brands" style={{ marginTop: "auto" }}>
+          回品牌目錄
+        </Link>
+      </aside>
 
-          <div className="stack">
-            <div className="decision-block">
-              <h3>定位與受眾</h3>
-              <p>{context.brain.audience}</p>
-              <p>{context.brain.offer}</p>
-            </div>
-            <div className="decision-block">
-              <h3>語氣規範</h3>
-              <p>{context.brain.voice}</p>
-            </div>
-            <div className="decision-block">
-              <h3>禁忌與升級</h3>
-              <div className="meta-row">
-                {[...context.brain.taboos, ...context.brain.escalationRules].map(
-                  (rule) => (
-                    <span className="badge" key={rule}>
-                      {rule}
-                    </span>
-                  ),
-                )}
+      <main className={`brand-app-main ${isFrozen ? "frozen" : ""}`}>
+        <div className="page-grid">
+          <div className="stack" style={{ gap: "32px" }}>
+            <header className="section isolated-section">
+              <div className="section-header">
+                <div>
+                  <div className="eyebrow">Brand App · {context.brand.id}</div>
+                  <h1>{context.brand.name}</h1>
+                  <p>{context.brand.positioning}</p>
+                </div>
+                <span className={`badge ${context.brand.operatingStage === "active" ? "reviewed" : context.brand.operatingStage}`}>
+                  {stageLabels[context.brand.operatingStage]}
+                </span>
               </div>
-            </div>
-            <div className="decision-block">
-              <h3>頻道規則</h3>
-              <div className="meta-row">
-                {context.brain.channelRules.map((rule) => (
-                  <span className="badge" key={rule}>
-                    {rule}
-                  </span>
+
+              <div className="metric-grid">
+                <div className="metric">
+                  <span className="metric-value">{context.assignedMembers.length}</span>
+                  <span className="metric-label">指派成員</span>
+                </div>
+                <div className="metric">
+                  <span className="metric-value">{context.tasks.length}</span>
+                  <span className="metric-label">日常任務</span>
+                </div>
+                <div className="metric">
+                  <span className="metric-value">{context.revenueSignals.length}</span>
+                  <span className="metric-label">營收訊號</span>
+                </div>
+              </div>
+            </header>
+
+            <section className="section isolated-section">
+              <div className="section-header">
+                <div>
+                  <div className="eyebrow">Brand Brain</div>
+                  <h2>品牌腦模組</h2>
+                  <p>此區只載入 {context.brand.name} 的品牌腦。</p>
+                </div>
+              </div>
+
+              <div className="stack">
+                <div className="decision-block">
+                  <h3>定位與受眾</h3>
+                  <p>{context.brain.audience}</p>
+                  <p>{context.brain.offer}</p>
+                </div>
+                <div className="decision-block">
+                  <h3>語氣規範</h3>
+                  <p>{context.brain.voice}</p>
+                </div>
+                <div className="decision-block">
+                  <h3>禁忌與升級</h3>
+                  <div className="meta-row">
+                    {[...context.brain.taboos, ...context.brain.escalationRules].map(
+                      (rule) => (
+                        <span className="badge" key={rule}>
+                          {rule}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="section isolated-section">
+              <header className="section-header">
+                <div>
+                  <div className="eyebrow">Daily Tasks</div>
+                  <h2>日常任務</h2>
+                </div>
+              </header>
+              <div className="card-list">
+                {context.tasks.map((task) => {
+                  const linkedSignals = getRevenueSignalsForBrandTask({
+                    task,
+                    revenueSignals: context.revenueSignals,
+                  });
+
+                  return (
+                    <article className="task-card" key={task.id}>
+                      <div className="section-header" style={{ marginBottom: 0 }}>
+                        <div>
+                          <div className="eyebrow">Owner · {userName(task.ownerUserId)}</div>
+                          <h3>{task.title}</h3>
+                        </div>
+                        <span className={`badge ${task.status}`}>{brandTaskStatusLabels[task.status]}</span>
+                      </div>
+                      <p>{task.expectedOutcome}</p>
+                      <div className="meta-row">
+                        {linkedSignals.map((signal) => (
+                          <span className="badge submitted" key={signal.id}>
+                            {signal.label}
+                          </span>
+                        ))}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          </div>
+
+          <aside className="stack" style={{ gap: "32px" }}>
+            <section className="section isolated-section">
+              <div className="eyebrow">Team</div>
+              <h2>成員指派</h2>
+              <div className="stack" style={{ gap: "12px", marginTop: "16px" }}>
+                {context.assignedMembers.map((member, index) => {
+                  // Mock member status
+                  const memberStatus = index === 0 ? "active" : index === 1 ? "paused" : "revoked";
+                  return (
+                    <div className="brain-card" key={member.id} style={{ padding: 12 }}>
+                      <div className="section-header" style={{ marginBottom: 0 }}>
+                        <div>
+                          <h3 style={{ fontSize: 14 }}>{member.name}</h3>
+                          <p style={{ fontSize: 12 }}>{member.role}</p>
+                        </div>
+                        <span className={`member-status ${memberStatus}`}>{memberStatus}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="section isolated-section">
+              <div className="eyebrow">Revenue Signals</div>
+              <h2>營收訊號</h2>
+              <div className="card-list">
+                {context.revenueSignals.map((signal) => (
+                  <div className="signal-card" key={signal.id}>
+                    <div className="meta-row" style={{ marginBottom: 8 }}>
+                      <span className="badge submitted">{revenueSignalTypeLabels[signal.type]}</span>
+                    </div>
+                    <h3 style={{ fontSize: 16 }}>{signal.label}</h3>
+                    <p style={{ fontSize: 14 }}>{signal.value}</p>
+                  </div>
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
+            </section>
+          </aside>
+        </div>
 
-        <section className="section">
-          <header className="section-header">
-            <div>
-              <div className="eyebrow">Daily Tasks</div>
-              <h2>日常任務</h2>
-              <p>任務、營收訊號與資深成員活動都以 brandId 綁定。</p>
-            </div>
-          </header>
-          <div className="card-list">
-            {context.tasks.map((task) => {
-              const linkedSignals = getRevenueSignalsForBrandTask({
-                task,
-                revenueSignals: context.revenueSignals,
-              });
-              const linkedActivities = context.seniorMemberActivities.filter(
-                (activity) => task.seniorMemberActivityIds.includes(activity.id),
-              );
-
-              return (
-                <article className="task-card" key={task.id}>
-                  <div className="section-header" style={{ marginBottom: 0 }}>
-                    <div>
-                      <div className="eyebrow">Owner · {userName(task.ownerUserId)}</div>
-                      <h3>{task.title}</h3>
-                    </div>
-                    <span className={`badge ${task.status}`}>{brandTaskStatusLabels[task.status]}</span>
-                  </div>
-                  <p>{task.expectedOutcome}</p>
-                  <div className="meta-row">
-                    {linkedSignals.map((signal) => (
-                      <span className="badge submitted" key={signal.id}>
-                        {signal.label}
-                      </span>
-                    ))}
-                    {linkedActivities.map((activity) => (
-                      <span className="badge" key={activity.id}>
-                        {activity.activityType}: {userName(activity.userId)}
-                      </span>
-                    ))}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+        <section id="brand-ops" style={{ marginTop: "40px" }}>
+          <BrandOpsPanel
+            brandId={context.brand.id}
+            isFrozen={isFrozen}
+            tasks={context.tasks}
+          />
         </section>
-      </div>
-
-      <aside className="stack">
-        <section className="section">
-          <div className="eyebrow">Member Assignment</div>
-          <h2>成員指派</h2>
-          <div className="card-list">
-            {context.assignedMembers.map((member) => (
-              <div className="brain-card" key={member.id}>
-                <div className="section-header" style={{ marginBottom: 0 }}>
-                  <div>
-                    <h3>{member.name}</h3>
-                    <p>{member.title}</p>
-                  </div>
-                  <span className="badge">{member.role}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="eyebrow">Revenue Signals</div>
-          <h2>營收訊號</h2>
-          <div className="card-list">
-            {context.revenueSignals.map((signal) => (
-              <div className="brain-card" key={signal.id}>
-                <div className="meta-row">
-                  <span className="badge submitted">{revenueSignalTypeLabels[signal.type]}</span>
-                  <span className="badge">{signal.confidence}</span>
-                </div>
-                <h3>{signal.label}</h3>
-                <p>{signal.value}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="eyebrow">Senior Activity</div>
-          <h2>資深成員活動</h2>
-          <div className="trace-list">
-            {context.seniorMemberActivities.map((activity) => (
-              <div className="trace-row active" key={activity.id}>
-                <div className="trace-content">
-                  <div className="trace-meta">
-                    <span className="trace-label">{userName(activity.userId)}</span>
-                    <time className="trace-time">
-                      {new Date(activity.createdAt).toLocaleString("zh-TW", {
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </time>
-                  </div>
-                  <p>{activity.summary}</p>
-                  <span className="badge" style={{ width: "fit-content" }}>
-                    {activity.activityType}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </aside>
+      </main>
     </div>
   );
 }
 
 function MuzoBrandWorkspace() {
   const workspace = buildMuzoWorkspace();
+  const isFrozen = workspace.brand.statusLabel === "暫停";
 
   return (
     <div className="brand-app-shell">
@@ -765,7 +765,7 @@ function MuzoBrandWorkspace() {
         <div className="brand-sidebar-card">
           <div className="meta-row" style={{ marginBottom: 12 }}>
             <span className="brand-badge">主品牌</span>
-            <span className="badge reviewed">{workspace.brand.statusLabel}</span>
+            <span className={`badge ${workspace.brand.statusLabel === "營運中" ? "reviewed" : "paused"}`}>{workspace.brand.statusLabel}</span>
           </div>
           <h2 style={{ marginBottom: 8 }}>{workspace.brand.name}</h2>
           <p>{workspace.brand.positioning}</p>
@@ -807,14 +807,14 @@ function MuzoBrandWorkspace() {
         </Link>
       </aside>
 
-      <main className="brand-app-main">
+      <main className={`brand-app-main ${isFrozen ? "frozen" : ""}`}>
         <header className="brand-hero">
           <div className="brand-hero-copy">
             <div className="eyebrow">Brand App · {workspace.brand.id}</div>
             <h1>{workspace.brand.name}</h1>
             <p>{workspace.brand.positioning}</p>
             <div className="meta-row">
-              <span className="badge reviewed">{workspace.brand.statusLabel}</span>
+              <span className={`badge ${workspace.brand.statusLabel === "營運中" ? "reviewed" : "paused"}`}>{workspace.brand.statusLabel}</span>
               <span className="badge">{workspace.brand.owner}</span>
               <span className="badge">{workspace.brand.scope}</span>
             </div>
@@ -1088,6 +1088,7 @@ function MuzoBrandWorkspace() {
         <section className="section" id="brand-ops">
           <BrandOpsPanel
             brandId={workspace.brand.id}
+            isFrozen={isFrozen}
             tasks={workspace.tasks.map((task) => ({
               id: task.id,
               brandId: workspace.brand.id,
@@ -1133,9 +1134,14 @@ export function BrandsCommandCenter() {
   const featuredCard = featuredContext
     ? buildBrandCardFromContext(featuredContext)
     : muzoDirectoryFallback;
-  const otherCards = contexts
+  
+  const allCards = contexts
     .filter((context) => context.brand.id !== MUZO_BRAND_ID)
     .map((context) => buildBrandCardFromContext(context));
+
+  const activeCards = allCards.filter(c => c.statusTone === "reviewed" || c.statusTone === "in_progress");
+  const inactiveCards = allCards.filter(c => c.statusTone === "paused" || c.statusTone === "archived");
+
   const spotlightTaskCount = featuredContext
     ? featuredContext.tasks.length
     : muzoTasksFallback.length;
@@ -1223,34 +1229,25 @@ export function BrandsCommandCenter() {
       <section className="section">
         <div className="section-header">
           <div>
-            <div className="eyebrow">Other Workspaces</div>
-            <h2>其他品牌工作區</h2>
-            <p>如果你要切到別的品牌，這裡的卡片會保留它自己的 context。</p>
+            <div className="eyebrow">Active Workspaces</div>
+            <h2>營運中品牌</h2>
+            <p>正在進行交付與品管操作的品牌空間。</p>
           </div>
         </div>
 
-        {otherCards.length > 0 ? (
+        {activeCards.length > 0 ? (
           <div className="brand-directory-grid">
-            {otherCards.map((card) => (
+            {activeCards.map((card) => (
               <Link className="task-card" href={card.href} key={card.id}>
                 <div className="section-header" style={{ marginBottom: 0 }}>
                   <div>
-                    <div className="eyebrow">{card.industry}</div>
+                    <div className="brand-badge">{card.industry}</div>
                     <h3>{card.name}</h3>
                   </div>
                   <span className={`badge ${card.statusTone}`}>{card.statusLabel}</span>
                 </div>
 
                 <p>{card.summary}</p>
-                <p>{card.goal}</p>
-
-                <div className="meta-row">
-                  {card.badges.map((badge) => (
-                    <span className="badge" key={badge}>
-                      {badge}
-                    </span>
-                  ))}
-                </div>
 
                 <div className="brand-directory-metrics">
                   {card.metrics.map((metric) => (
@@ -1264,9 +1261,36 @@ export function BrandsCommandCenter() {
             ))}
           </div>
         ) : (
-          <div className="empty">目前只有木酢寵物達人和品牌導向的工作入口。</div>
+          <div className="empty">目前沒有其他營運中的品牌。</div>
         )}
       </section>
+
+      {inactiveCards.length > 0 && (
+        <section className="section">
+          <div className="section-header">
+            <div>
+              <div className="eyebrow">Inactive Workspaces</div>
+              <h2>暫停與歸檔</h2>
+              <p>資料已保留但操作凍結的品牌空間。</p>
+            </div>
+          </div>
+
+          <div className="brand-directory-grid">
+            {inactiveCards.map((card) => (
+              <Link className="task-card" href={card.href} key={card.id} style={{ opacity: 0.6, filter: "grayscale(0.5)" }}>
+                <div className="section-header" style={{ marginBottom: 0 }}>
+                  <div>
+                    <div className="brand-badge">{card.industry}</div>
+                    <h3>{card.name}</h3>
+                  </div>
+                  <span className={`badge ${card.statusTone}`}>{card.statusLabel}</span>
+                </div>
+                <p>{card.summary}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
