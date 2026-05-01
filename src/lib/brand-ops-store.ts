@@ -9,6 +9,7 @@ import type {
 } from "./domain";
 import {
   brandBrains as seedBrandBrains,
+  brandDataSources as seedBrandDataSources,
   brandTasks as seedBrandTasks,
   clientBrands,
   currentUser,
@@ -174,6 +175,7 @@ function buildContext(state: BrandOpsState, brandId: string) {
     brandTasks: state.brandTasks,
     revenueSignals: state.revenueSignals,
     seniorMemberActivities: state.seniorMemberActivities,
+    dataSources: seedBrandDataSources,
     users,
   });
 }

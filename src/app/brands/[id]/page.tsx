@@ -22,6 +22,13 @@ const taskStatusLabels = {
   done: "完成",
 };
 
+const dataSourceStatusLabels = {
+  mock_ready: "Mock ready",
+  manual_import_ready: "可手動匯入",
+  needs_setup: "待設定",
+  paused: "暫停",
+};
+
 function userName(userId: string) {
   return users.find((user) => user.id === userId)?.name ?? userId;
 }
@@ -176,6 +183,38 @@ export default async function BrandDetailPage({
                   </div>
                   <span className="badge">{member.role}</span>
                 </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="eyebrow">Data Sources</div>
+          <h2>數據來源</h2>
+          <div className="card-list">
+            {context.dataSources.map((dataSource) => (
+              <div className="brain-card" key={dataSource.id}>
+                <div className="meta-row">
+                  <span className="badge submitted">{dataSource.name}</span>
+                  <span className="badge">
+                    {dataSourceStatusLabels[dataSource.status]}
+                  </span>
+                  <span className="badge">{dataSource.trustLevel}</span>
+                </div>
+                <p>{dataSource.notes}</p>
+                <p>
+                  {dataSource.lastSyncedAt
+                    ? `最後同步：${new Date(dataSource.lastSyncedAt).toLocaleString(
+                        "zh-TW",
+                        {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}`
+                    : "尚未同步"}
+                </p>
               </div>
             ))}
           </div>

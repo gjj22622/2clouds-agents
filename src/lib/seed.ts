@@ -1,6 +1,9 @@
 import type {
   Brain,
   BrandBrain,
+  BrandDataSource,
+  BrandNormalizedMetric,
+  BrandRawImport,
   BrandTask,
   ClientBrand,
   DecisionPrompt,
@@ -16,6 +19,9 @@ import {
   muzopetBrand,
   muzopetBrandBrain,
   muzopetBrandTasks,
+  muzopetDataSources,
+  muzopetNormalizedMetrics,
+  muzopetRawImports,
   muzopetRevenueSignals,
   muzopetSeniorMemberActivities,
 } from "./brand-packs/muzopet";
@@ -175,6 +181,14 @@ export const brandTasks: BrandTask[] = [
     seniorMemberActivityIds: ["activity-demo-strategy-review"],
   },
   ...muzopetBrandTasks,
+];
+
+export const brandDataSources: BrandDataSource[] = [...muzopetDataSources];
+
+export const brandRawImports: BrandRawImport[] = [...muzopetRawImports];
+
+export const brandNormalizedMetrics: BrandNormalizedMetric[] = [
+  ...muzopetNormalizedMetrics,
 ];
 
 export const knowledgeNodes: KnowledgeNode[] = [

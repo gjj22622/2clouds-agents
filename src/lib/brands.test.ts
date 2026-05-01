@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   buildBrandOperatingContext,
+  getBrandDataSourceRegistry,
+  getNormalizedMetricsForDataSource,
   getRevenueSignalsForBrandTask,
 } from "./brands";
 import {
   brandBrains,
+  brandDataSources,
+  brandNormalizedMetrics,
+  brandRawImports,
   brandTasks,
   clientBrands,
   currentUser,
@@ -31,6 +36,7 @@ describe("brand operating context", () => {
       brandTasks,
       revenueSignals,
       seniorMemberActivities,
+      dataSources: brandDataSources,
       users,
     });
 
@@ -41,6 +47,7 @@ describe("brand operating context", () => {
       currentUser.id,
     ]);
     expect(context.tasks.length).toBeGreaterThan(0);
+    expect(context.dataSources).toHaveLength(0);
     expect(context.revenueSignals.length).toBeGreaterThan(0);
     expect(context.seniorMemberActivities.length).toBeGreaterThan(0);
   });
@@ -53,6 +60,7 @@ describe("brand operating context", () => {
       brandTasks,
       revenueSignals,
       seniorMemberActivities,
+      dataSources: brandDataSources,
       users,
     });
 
@@ -63,6 +71,14 @@ describe("brand operating context", () => {
       currentUser.id,
     ]);
     expect(context.tasks).toHaveLength(3);
+    expect(context.dataSources.map((source) => source.system)).toEqual([
+      "website",
+      "shopee",
+      "ga4",
+      "meta_ads",
+      "google_ads",
+      "line",
+    ]);
     expect(context.revenueSignals).toHaveLength(3);
     expect(context.seniorMemberActivities).toHaveLength(3);
     expect(context.brain.brandId).toBe("brand-muzopet");
@@ -94,6 +110,7 @@ describe("brand operating context", () => {
         brandTasks,
         revenueSignals,
         seniorMemberActivities,
+        dataSources: brandDataSources,
         users,
       }),
     ).toThrow("Brand missing-brand was not found");
@@ -130,6 +147,7 @@ describe("brand operating context", () => {
         },
       ],
       seniorMemberActivities,
+      dataSources: brandDataSources,
       users,
     });
 
@@ -141,5 +159,46 @@ describe("brand operating context", () => {
         (signal) => signal.brandId !== context.brand.id,
       ),
     ).toBe(false);
+  });
+
+  it("returns the MuzoPet data source registry with sync status and trust", () => {
+    const registry = getBrandDataSourceRegistry({
+      brandId: "brand-muzopet",
+      dataSources: brandDataSources,
+    });
+
+    expect(registry).toHaveLength(6);
+    expect(registry.map((source) => source.name)).toEqual([
+      "官網銷售",
+      "蝦皮銷售",
+      "Google Analytics 4",
+      "Meta Ads",
+      "Google Ads",
+      "LINE Ads / LINE OA",
+    ]);
+    expect(registry.every((source) => source.lastSyncedAt)).toBe(true);
+    expect(registry.find((source) => source.system === "website")?.trustLevel).toBe(
+      "high",
+    );
+  });
+
+  it("links normalized metrics to their raw import and data source", () => {
+    const websiteSource = brandDataSources.find(
+      (source) => source.id === "datasource-muzopet-website",
+    );
+
+    expect(websiteSource).toBeDefined();
+
+    const metrics = getNormalizedMetricsForDataSource({
+      dataSource: websiteSource!,
+      rawImports: brandRawImports,
+      normalizedMetrics: brandNormalizedMetrics,
+    });
+
+    expect(metrics).toHaveLength(1);
+    expect(metrics[0]?.metricKey).toBe("gmv");
+    expect(metrics[0]?.rawImportId).toBe(
+      "raw-muzopet-website-orders-2026-05-01",
+    );
   });
 });

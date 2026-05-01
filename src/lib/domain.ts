@@ -146,6 +146,48 @@ export type RevenueSignal = {
   observedAt: string;
 };
 
+export type BrandDataSourceSystem =
+  | "website"
+  | "shopee"
+  | "ga4"
+  | "meta_ads"
+  | "google_ads"
+  | "line";
+
+export type BrandDataSource = {
+  id: string;
+  brandId: string;
+  system: BrandDataSourceSystem;
+  name: string;
+  role: "transaction_truth" | "marketplace_sales" | "behavior" | "ad_spend" | "member_reactivation";
+  status: "mock_ready" | "manual_import_ready" | "needs_setup" | "paused";
+  lastSyncedAt?: string;
+  trustLevel: "low" | "medium" | "high";
+  notes: string;
+};
+
+export type BrandRawImport = {
+  id: string;
+  brandId: string;
+  dataSourceId: string;
+  importedAt: string;
+  payloadKind: "orders" | "events" | "campaign_spend" | "members" | "summary";
+  recordCount: number;
+  status: "received" | "normalized" | "rejected";
+};
+
+export type BrandNormalizedMetric = {
+  id: string;
+  brandId: string;
+  dataSourceId: string;
+  rawImportId?: string;
+  metricKey: "gmv" | "orders" | "sessions" | "spend" | "clicks" | "roas" | "line_clicks";
+  value: number;
+  unit: "twd" | "count" | "ratio";
+  occurredAt: string;
+  confidence: RevenueSignal["confidence"];
+};
+
 export type SeniorMemberActivity = {
   id: string;
   brandId: string;
@@ -160,6 +202,7 @@ export type BrandOperatingContext = {
   brand: ClientBrand;
   brain: BrandBrain;
   assignedMembers: User[];
+  dataSources: BrandDataSource[];
   tasks: BrandTask[];
   revenueSignals: RevenueSignal[];
   seniorMemberActivities: SeniorMemberActivity[];

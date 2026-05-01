@@ -2,6 +2,7 @@ import Link from "next/link";
 import { buildBrandOperatingContext } from "@/lib/brands";
 import {
   brandBrains,
+  brandDataSources,
   brandTasks,
   clientBrands,
   currentUser,
@@ -27,6 +28,7 @@ export default function BrandsPage() {
       brandTasks,
       revenueSignals,
       seniorMemberActivities,
+      dataSources: brandDataSources,
       users,
     }),
   );
