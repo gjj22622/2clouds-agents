@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
   buildBrandOperatingContext,
+  canEnterBrandApp,
   getBrandDataSourceRegistry,
   getNormalizedMetricsForDataSource,
   getRevenueSignalsForBrandTask,
+  shouldEnableBrandConnector,
+  shouldShowBrandInCommandCenter,
 } from "./brands";
 import {
   brandBrains,
   brandDataSources,
+  brandMemberAssignments,
   brandNormalizedMetrics,
   brandRawImports,
   brandTasks,
@@ -37,6 +41,7 @@ describe("brand operating context", () => {
       revenueSignals,
       seniorMemberActivities,
       dataSources: brandDataSources,
+      memberAssignments: brandMemberAssignments,
       users,
     });
 
@@ -46,6 +51,11 @@ describe("brand operating context", () => {
       reviewerUser.id,
       currentUser.id,
     ]);
+    expect(
+      context.memberAssignments.every(
+        (assignment) => assignment.status === "active",
+      ),
+    ).toBe(true);
     expect(context.tasks.length).toBeGreaterThan(0);
     expect(context.dataSources).toHaveLength(0);
     expect(context.revenueSignals.length).toBeGreaterThan(0);
@@ -61,6 +71,7 @@ describe("brand operating context", () => {
       revenueSignals,
       seniorMemberActivities,
       dataSources: brandDataSources,
+      memberAssignments: brandMemberAssignments,
       users,
     });
 
@@ -111,6 +122,7 @@ describe("brand operating context", () => {
         revenueSignals,
         seniorMemberActivities,
         dataSources: brandDataSources,
+        memberAssignments: brandMemberAssignments,
         users,
       }),
     ).toThrow("Brand missing-brand was not found");
@@ -148,6 +160,7 @@ describe("brand operating context", () => {
       ],
       seniorMemberActivities,
       dataSources: brandDataSources,
+      memberAssignments: brandMemberAssignments,
       users,
     });
 
@@ -200,5 +213,57 @@ describe("brand operating context", () => {
     expect(metrics[0]?.rawImportId).toBe(
       "raw-muzopet-website-orders-2026-05-01",
     );
+  });
+
+  it("evaluates brand lifecycle visibility and connector activation", () => {
+    expect(
+      shouldShowBrandInCommandCenter({ operatingStage: "active" }),
+    ).toBe(true);
+    expect(
+      shouldShowBrandInCommandCenter({ operatingStage: "paused" }),
+    ).toBe(true);
+    expect(
+      shouldShowBrandInCommandCenter({ operatingStage: "archived" }),
+    ).toBe(false);
+
+    expect(shouldEnableBrandConnector({ operatingStage: "active" })).toBe(true);
+    expect(shouldEnableBrandConnector({ operatingStage: "resumed" })).toBe(true);
+    expect(shouldEnableBrandConnector({ operatingStage: "paused" })).toBe(false);
+    expect(shouldEnableBrandConnector({ operatingStage: "archived" })).toBe(false);
+  });
+
+  it("requires active member assignment before entering a Brand App", () => {
+    const brand = clientBrands.find((candidate) => candidate.id === "brand-muzopet");
+
+    expect(brand).toBeDefined();
+    expect(
+      canEnterBrandApp({
+        brand: brand!,
+        memberId: currentUser.id,
+        memberAssignments: brandMemberAssignments,
+      }),
+    ).toBe(true);
+    expect(
+      canEnterBrandApp({
+        brand: brand!,
+        memberId: "unassigned-user",
+        memberAssignments: brandMemberAssignments,
+      }),
+    ).toBe(false);
+    expect(
+      canEnterBrandApp({
+        brand: { id: "brand-muzopet", operatingStage: "archived" },
+        memberId: currentUser.id,
+        memberAssignments: brandMemberAssignments,
+        isAdmin: true,
+      }),
+    ).toBe(false);
+    expect(
+      canEnterBrandApp({
+        brand: { id: "brand-other-demo", operatingStage: "active" },
+        memberId: currentUser.id,
+        memberAssignments: brandMemberAssignments,
+      }),
+    ).toBe(false);
   });
 });

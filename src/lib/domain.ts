@@ -106,9 +106,55 @@ export type ClientBrand = {
   industry: string;
   ownerUserId: string;
   assignedMemberIds: string[];
-  operatingStage: "onboarding" | "active" | "paused";
+  operatingStage: BrandOperatingStage;
   positioning: string;
   primaryGoal: string;
+};
+
+export type BrandOperatingStage =
+  | "onboarding"
+  | "active"
+  | "paused"
+  | "resumed"
+  | "archived";
+
+export type BrandLifecycleEvent = {
+  id: string;
+  brandId: string;
+  fromStage?: BrandOperatingStage;
+  toStage: BrandOperatingStage;
+  eventType: "created" | "activated" | "paused" | "resumed" | "archived";
+  actorId: string;
+  occurredAt: string;
+  note?: string;
+};
+
+export type BrandMemberRole = "newcomer_trainee" | "reviewer" | "lead";
+
+export type BrandMemberAssignmentStatus = "active" | "paused" | "revoked";
+
+export type BrandMemberAssignment = {
+  id: string;
+  brandId: string;
+  memberId: string;
+  role: BrandMemberRole;
+  status: BrandMemberAssignmentStatus;
+  assignedAt: string;
+  assignedBy: string;
+  validUntil?: string;
+};
+
+export type MemberLifecycleEvent = {
+  id: string;
+  brandId: string;
+  memberId: string;
+  assignmentId: string;
+  fromStatus?: BrandMemberAssignmentStatus;
+  toStatus: BrandMemberAssignmentStatus;
+  eventType: "assigned" | "paused" | "resumed" | "revoked";
+  actorId: string;
+  occurredAt: string;
+  note?: string;
 };
 
 export type BrandBrain = {
@@ -203,6 +249,7 @@ export type SeniorMemberActivity = {
 export type BrandOperatingContext = {
   brand: ClientBrand;
   brain: BrandBrain;
+  memberAssignments: BrandMemberAssignment[];
   assignedMembers: User[];
   dataSources: BrandDataSource[];
   tasks: BrandTask[];

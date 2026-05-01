@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRevenueSignalsForBrandTask } from "@/lib/brands";
+import {
+  getRevenueSignalsForBrandTask,
+  shouldShowBrandInCommandCenter,
+} from "@/lib/brands";
 import { brandOpsStore } from "@/lib/brand-ops-store";
 import { BrandOpsPanel } from "@/components/BrandOpsPanel";
 import {
@@ -10,6 +13,7 @@ import {
 } from "@/lib/seed";
 import type {
   BrandOperatingContext,
+  BrandOperatingStage,
   BrandTaskStatus,
   RevenueSignal,
   SeniorMemberActivity,
@@ -18,11 +22,13 @@ import type {
 const users = [currentUser, reviewerUser];
 const MUZO_BRAND_ID = "brand-muzopet";
 
-const stageLabels = {
+const stageLabels: Record<BrandOperatingStage, string> = {
   onboarding: "導入中",
   active: "營運中",
   paused: "暫停",
-} as const;
+  resumed: "已恢復",
+  archived: "已封存",
+};
 
 const brandTaskStatusLabels: Record<BrandTaskStatus, string> = {
   queued: "排程中",
@@ -393,6 +399,10 @@ function userName(userId: string) {
 
 function safeBuildBrandContexts(): BrandOperatingContext[] {
   return clientBrands.flatMap((brand) => {
+    if (!shouldShowBrandInCommandCenter(brand)) {
+      return [];
+    }
+
     try {
       return [brandOpsStore.getBrandOperatingContext(brand.id)];
     } catch {
@@ -410,7 +420,8 @@ function buildBrandCardFromContext(context: BrandOperatingContext) {
     industry: context.brand.industry,
     statusLabel: stageLabels[context.brand.operatingStage],
     statusTone:
-      context.brand.operatingStage === "active"
+      context.brand.operatingStage === "active" ||
+      context.brand.operatingStage === "resumed"
         ? ("reviewed" as const)
         : context.brand.operatingStage === "onboarding"
           ? ("in_progress" as const)

@@ -10,6 +10,7 @@ import type {
 import {
   brandBrains as seedBrandBrains,
   brandDataSources as seedBrandDataSources,
+  brandMemberAssignments as seedBrandMemberAssignments,
   brandTasks as seedBrandTasks,
   clientBrands,
   currentUser,
@@ -176,6 +177,7 @@ function buildContext(state: BrandOpsState, brandId: string) {
     revenueSignals: state.revenueSignals,
     seniorMemberActivities: state.seniorMemberActivities,
     dataSources: seedBrandDataSources,
+    memberAssignments: seedBrandMemberAssignments,
     users,
   });
 }

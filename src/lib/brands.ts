@@ -1,6 +1,8 @@
 import type {
   BrandBrain,
+  BrandMemberAssignment,
   BrandOperatingContext,
+  BrandOperatingStage,
   BrandDataSource,
   BrandNormalizedMetric,
   BrandRawImport,
@@ -19,6 +21,7 @@ export function buildBrandOperatingContext(params: {
   revenueSignals: RevenueSignal[];
   seniorMemberActivities: SeniorMemberActivity[];
   dataSources: BrandDataSource[];
+  memberAssignments: BrandMemberAssignment[];
   users: User[];
 }): BrandOperatingContext {
   const brand = params.brands.find((candidate) => candidate.id === params.brandId);
@@ -35,10 +38,17 @@ export function buildBrandOperatingContext(params: {
     throw new Error(`Brand brain for ${brand.id} was not found`);
   }
 
+  const memberAssignments = getActiveBrandMemberAssignments({
+    brandId: brand.id,
+    memberAssignments: params.memberAssignments,
+  });
+
   return {
     brand,
     brain,
-    assignedMembers: brand.assignedMemberIds.flatMap((memberId) => {
+    memberAssignments,
+    assignedMembers: memberAssignments.flatMap((assignment) => {
+      const memberId = assignment.memberId;
       const user = params.users.find((candidate) => candidate.id === memberId);
       return user ? [user] : [];
     }),
@@ -54,6 +64,50 @@ export function buildBrandOperatingContext(params: {
       (activity) => activity.brandId === brand.id,
     ),
   };
+}
+
+export function shouldShowBrandInCommandCenter(brand: {
+  operatingStage: BrandOperatingStage;
+}): boolean {
+  return brand.operatingStage !== "archived";
+}
+
+export function canEnterBrandApp(params: {
+  brand: { id: string; operatingStage: BrandOperatingStage };
+  memberId: string;
+  memberAssignments: BrandMemberAssignment[];
+  isAdmin?: boolean;
+}): boolean {
+  if (params.brand.operatingStage === "archived") {
+    return false;
+  }
+
+  if (params.isAdmin) {
+    return true;
+  }
+
+  return params.memberAssignments.some(
+    (assignment) =>
+      assignment.brandId === params.brand.id &&
+      assignment.memberId === params.memberId &&
+      assignment.status === "active",
+  );
+}
+
+export function shouldEnableBrandConnector(brand: {
+  operatingStage: BrandOperatingStage;
+}): boolean {
+  return brand.operatingStage === "active" || brand.operatingStage === "resumed";
+}
+
+export function getActiveBrandMemberAssignments(params: {
+  brandId: string;
+  memberAssignments: BrandMemberAssignment[];
+}): BrandMemberAssignment[] {
+  return params.memberAssignments.filter(
+    (assignment) =>
+      assignment.brandId === params.brandId && assignment.status === "active",
+  );
 }
 
 export function getBrandDataSourceRegistry(params: {

@@ -2,6 +2,8 @@ import type {
   Brain,
   BrandBrain,
   BrandDataSource,
+  BrandLifecycleEvent,
+  BrandMemberAssignment,
   BrandNormalizedMetric,
   BrandRawImport,
   BrandTask,
@@ -14,6 +16,7 @@ import type {
   TrainingTask,
   TrainingTaskAssignment,
   User,
+  MemberLifecycleEvent,
 } from "./domain";
 import {
   muzopetBrand,
@@ -87,6 +90,82 @@ export const clientBrands: ClientBrand[] = [
     primaryGoal: "Turn qualified consultations into retained monthly service clients.",
   },
   muzopetBrand,
+];
+
+export const brandLifecycleEvents: BrandLifecycleEvent[] = [
+  {
+    id: "brand-lifecycle-demo-activated",
+    brandId: "brand-2clouds-demo",
+    fromStage: "onboarding",
+    toStage: "active",
+    eventType: "activated",
+    actorId: reviewerUser.id,
+    occurredAt: "2026-05-01T08:00:00.000Z",
+    note: "Demo brand is available for internal operating context checks.",
+  },
+  {
+    id: "brand-lifecycle-muzopet-resumed",
+    brandId: "brand-muzopet",
+    fromStage: "paused",
+    toStage: "resumed",
+    eventType: "resumed",
+    actorId: reviewerUser.id,
+    occurredAt: "2026-05-01T08:30:00.000Z",
+    note: "MuzoPet data and task context are ready for v1 brand operations.",
+  },
+];
+
+export const brandMemberAssignments: BrandMemberAssignment[] = [
+  {
+    id: "assignment-demo-reviewer",
+    brandId: "brand-2clouds-demo",
+    memberId: reviewerUser.id,
+    role: "reviewer",
+    status: "active",
+    assignedAt: "2026-05-01T08:00:00.000Z",
+    assignedBy: reviewerUser.id,
+  },
+  {
+    id: "assignment-demo-newcomer",
+    brandId: "brand-2clouds-demo",
+    memberId: currentUser.id,
+    role: "newcomer_trainee",
+    status: "active",
+    assignedAt: "2026-05-01T08:05:00.000Z",
+    assignedBy: reviewerUser.id,
+  },
+  {
+    id: "assignment-muzopet-reviewer",
+    brandId: "brand-muzopet",
+    memberId: reviewerUser.id,
+    role: "reviewer",
+    status: "active",
+    assignedAt: "2026-05-01T08:30:00.000Z",
+    assignedBy: reviewerUser.id,
+  },
+  {
+    id: "assignment-muzopet-newcomer",
+    brandId: "brand-muzopet",
+    memberId: currentUser.id,
+    role: "newcomer_trainee",
+    status: "active",
+    assignedAt: "2026-05-01T08:35:00.000Z",
+    assignedBy: reviewerUser.id,
+  },
+];
+
+export const memberLifecycleEvents: MemberLifecycleEvent[] = [
+  {
+    id: "member-lifecycle-muzopet-newcomer-assigned",
+    brandId: "brand-muzopet",
+    memberId: currentUser.id,
+    assignmentId: "assignment-muzopet-newcomer",
+    toStatus: "active",
+    eventType: "assigned",
+    actorId: reviewerUser.id,
+    occurredAt: "2026-05-01T08:35:00.000Z",
+    note: "Newcomer can inspect MuzoPet Brand App context while still under review gates.",
+  },
 ];
 
 export const brandBrains: BrandBrain[] = [
