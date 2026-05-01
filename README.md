@@ -33,6 +33,7 @@
 - [Reviewer 品管閉環工作流程](docs/reviewer-workflow.md)
 - [Brand Onboarding Workflow](docs/brand-onboarding-workflow.md)
 - [品牌導入 Checklist 模板](docs/brand-intake-checklist.md)
+- [多品牌獨立應用架構](docs/multi-brand-app-architecture.md)
 - [Domain Model](docs/domain-model.md)
 - [API / Resource Boundaries](docs/api-resource-boundaries.md)
 - [Frontend Architecture](docs/frontend-architecture.md)
