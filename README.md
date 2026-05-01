@@ -34,6 +34,8 @@
 - [Brand Onboarding Workflow](docs/brand-onboarding-workflow.md)
 - [品牌導入 Checklist 模板](docs/brand-intake-checklist.md)
 - [多品牌獨立應用架構](docs/multi-brand-app-architecture.md)
+- [Brand App 隔離規格](docs/brand-app-isolation-spec.md)
+- [木酢寵物達人導入準備格式](docs/mujiso-intake-prep.md)
 - [Domain Model](docs/domain-model.md)
 - [API / Resource Boundaries](docs/api-resource-boundaries.md)
 - [Frontend Architecture](docs/frontend-architecture.md)
