@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type {
   TaskStatus,
   TraceLog,
@@ -9,12 +9,10 @@ import type {
   User,
 } from "@/lib/domain";
 import {
-  canTransitionTaskStatus,
   createStatusTraceLog,
+  getAvailableActorTransitions,
 } from "@/lib/training";
 import { statusLabels } from "./status";
-
-const nextStatuses: TaskStatus[] = ["in_progress", "submitted"];
 
 export function TaskWorkspace({
   task,
@@ -28,16 +26,10 @@ export function TaskWorkspace({
   initialTraceLogs: TraceLog[];
 }) {
   const [status, setStatus] = useState<TaskStatus>(assignment.status);
+  const [reviewerNote] = useState<string | undefined>(assignment.reviewerNote);
   const [logs, setLogs] = useState<TraceLog[]>(initialTraceLogs);
 
-  const availableStatuses = useMemo(
-    () =>
-      nextStatuses.filter(
-        (targetStatus) =>
-          targetStatus !== status && canTransitionTaskStatus(status, targetStatus),
-      ),
-    [status],
-  );
+  const availableStatuses = getAvailableActorTransitions(status, user.role);
 
   function moveTo(toStatus: TaskStatus) {
     const log = createStatusTraceLog({
@@ -54,7 +46,7 @@ export function TaskWorkspace({
     <section className="section">
       <div className="section-header">
         <div>
-          <div className="eyebrow">{task.module}</div>
+          <div className="eyebrow">Stage {task.stage} · {task.module}</div>
           <h1>{task.title}</h1>
           <p>{task.brief}</p>
         </div>
@@ -62,6 +54,13 @@ export function TaskWorkspace({
       </div>
 
       <div className="stack" style={{ marginTop: 18 }}>
+        {reviewerNote && status === "needs_revision" && (
+          <div className="reviewer-note">
+            <h2>Reviewer 意見</h2>
+            <p>{reviewerNote}</p>
+          </div>
+        )}
+
         <div>
           <h2>交付標準</h2>
           <p>{task.expectedOutput}</p>
@@ -83,28 +82,31 @@ export function TaskWorkspace({
               ))}
             </div>
           ) : (
-            <div className="empty">此任務目前沒有可由新人操作的下一個狀態。</div>
+            <div className="empty">此任務目前沒有可操作的下一個狀態。</div>
           )}
         </div>
 
         <div>
           <h2>Trace log</h2>
-          <div className="card-list">
-            {logs.map((log) => (
-              <div className="trace-row" key={log.id}>
-                <div className="meta-row">
-                  <span className="badge">{log.action}</span>
-                  {log.fromStatus && (
-                    <span className="badge">
-                      {statusLabels[log.fromStatus]} to{" "}
-                      {log.toStatus ? statusLabels[log.toStatus] : ""}
-                    </span>
-                  )}
+          {logs.length === 0 ? (
+            <div className="empty">尚無操作記錄。</div>
+          ) : (
+            <div className="card-list">
+              {logs.map((log) => (
+                <div className="trace-row" key={log.id}>
+                  <div className="meta-row">
+                    <span className="badge">{log.action}</span>
+                    {log.fromStatus && log.toStatus && (
+                      <span className="badge">
+                        {statusLabels[log.fromStatus]} → {statusLabels[log.toStatus]}
+                      </span>
+                    )}
+                  </div>
+                  <p>{new Date(log.createdAt).toLocaleString("zh-TW")}</p>
                 </div>
-                <p>{new Date(log.createdAt).toLocaleString("zh-TW")}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>
