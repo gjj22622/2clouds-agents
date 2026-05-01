@@ -11,6 +11,7 @@ import {
 import type {
   BrandOperatingContext,
   BrandTaskStatus,
+  ClientBrand,
   RevenueSignal,
   SeniorMemberActivity,
 } from "@/lib/domain";
@@ -18,11 +19,13 @@ import type {
 const users = [currentUser, reviewerUser];
 const MUZO_BRAND_ID = "brand-muzopet";
 
-const stageLabels = {
+const stageLabels: Record<ClientBrand["operatingStage"], string> = {
   onboarding: "導入中",
   active: "營運中",
   paused: "暫停",
-} as const;
+  archived: "封存",
+  resumed: "恢復中",
+};
 
 const brandTaskStatusLabels: Record<BrandTaskStatus, string> = {
   queued: "排程中",

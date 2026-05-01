@@ -100,15 +100,78 @@ export type NewcomerDashboard = {
   latestTraceLog?: TraceLog;
 };
 
+export type BrandOperatingStage =
+  | "onboarding"   // 品牌資料包正在填寫，新人尚不能進場
+  | "active"       // 正常營運，任務與訊號正在產生
+  | "paused"       // 暫停：任務凍結，Connector 停用，新人無法進場
+  | "archived"     // 封存：合約結束，資料唯讀保留，不可回復
+  | "resumed";     // 恢復中：從暫停回到活躍的過渡驗證期
+
 export type ClientBrand = {
   id: string;
   name: string;
   industry: string;
   ownerUserId: string;
   assignedMemberIds: string[];
-  operatingStage: "onboarding" | "active" | "paused";
+  operatingStage: BrandOperatingStage;
   positioning: string;
   primaryGoal: string;
+};
+
+// ─── Brand & Member Lifecycle ─────────────────────────────────────────────────
+
+export type BrandMemberAssignmentStatus =
+  | "invited"      // 已指派但尚未完成品牌速查卡
+  | "active"       // 正常工作中
+  | "paused"       // 暫停（例如請假），任務已轉派
+  | "offboarded"   // 已離開平台，指派記錄保留
+  | "reassigned"   // 此指派已結束，任務移轉給他人（成員仍在平台）
+  | "reactivated"; // 從 paused 恢復工作
+
+export type BrandMemberAssignmentRole =
+  | "newcomer_trainee"  // 新人，只看自己的任務
+  | "reviewer"          // 品管員，看全品牌任務
+  | "lead";             // 資深成員，可建立任務與訊號
+
+export type BrandMemberAssignment = {
+  id: string;
+  brandId: string;
+  userId: string;
+  role: BrandMemberAssignmentRole;
+  status: BrandMemberAssignmentStatus;
+  assignedAt: string;
+  assignedBy: string;       // userId（通常是 Sophia 或 Jacky）
+  validUntil?: string;      // 指派有效期（非必填）
+  pausedAt?: string;
+  pausedReason?: string;
+  resumedAt?: string;
+  offboardedAt?: string;
+  offboardedReason?: string;
+  reassignedTo?: string;    // 任務轉派對象 userId
+  updatedAt: string;
+};
+
+export type BrandLifecycleEvent = {
+  id: string;
+  brandId: string;
+  fromStage: BrandOperatingStage | null;  // null = 品牌初建
+  toStage: BrandOperatingStage;
+  triggeredBy: string;      // userId
+  reason?: string;
+  createdAt: string;
+};
+
+export type MemberLifecycleEvent = {
+  id: string;
+  userId: string;
+  brandId?: string;          // 品牌層級事件時填入；平台層級事件可為空
+  assignmentId?: string;
+  fromStatus: BrandMemberAssignmentStatus | null;
+  toStatus: BrandMemberAssignmentStatus;
+  triggeredBy: string;       // userId（Sophia / Jacky）
+  reason?: string;
+  taskReassignments?: Array<{ taskId: string; newOwnerId: string }>;
+  createdAt: string;
 };
 
 export type BrandBrain = {
