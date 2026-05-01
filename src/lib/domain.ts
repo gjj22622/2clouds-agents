@@ -171,9 +171,11 @@ export type BrandRawImport = {
   brandId: string;
   dataSourceId: string;
   importedAt: string;
-  payloadKind: "orders" | "events" | "campaign_spend" | "members" | "summary";
+  payloadKind: "orders" | "events" | "campaign_spend" | "members" | "summary" | "sheet_summary";
   recordCount: number;
   status: "received" | "normalized" | "rejected";
+  importMethod?: "manual" | "google_sheets" | "api";
+  connectorId?: string;
 };
 
 export type BrandNormalizedMetric = {
@@ -206,4 +208,79 @@ export type BrandOperatingContext = {
   tasks: BrandTask[];
   revenueSignals: RevenueSignal[];
   seniorMemberActivities: SeniorMemberActivity[];
+};
+
+// ─── Google Sheets Connector ──────────────────────────────────────────────────
+
+export type BrandSheetFieldMapping = {
+  column: string;
+  platformField: string;
+  unit?: BrandNormalizedMetric["unit"];
+  required: boolean;
+  notes?: string;
+};
+
+export type BrandSheetReadTabKind =
+  | "daily_summary"
+  | "orders"
+  | "campaign_spend"
+  | "line_report"
+  | "shopee_report"
+  | "custom";
+
+export type BrandSheetWritebackKind =
+  | "task_status"
+  | "revenue_signal"
+  | "reviewer_note"
+  | "trace_log"
+  | "daily_summary";
+
+export type BrandSheetReadConfig = {
+  id: string;
+  tabName: string;
+  tabKind: BrandSheetReadTabKind;
+  dataSourceId: string;
+  headerRow: number;
+  dataStartRow: number;
+  fieldMapping: BrandSheetFieldMapping[];
+  triggerKind: "manual" | "scheduled";
+  lastReadAt?: string;
+};
+
+export type BrandSheetWritebackConfig = {
+  id: string;
+  tabName: string;
+  writebackKind: BrandSheetWritebackKind;
+  headerRow: number;
+  dataStartRow: number;
+  fieldMapping: BrandSheetFieldMapping[];
+  triggerKind: "manual" | "on_review" | "daily";
+  requiresReviewerApproval: boolean;
+};
+
+export type BrandSheetConnector = {
+  id: string;
+  brandId: string;
+  sheetId: string;
+  label: string;
+  status: "active" | "paused" | "needs_setup";
+  readConfigs: BrandSheetReadConfig[];
+  writebackConfigs: BrandSheetWritebackConfig[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BrandSheetSyncLog = {
+  id: string;
+  brandId: string;
+  connectorId: string;
+  readConfigId?: string;
+  writebackConfigId?: string;
+  direction: "read" | "writeback";
+  status: "success" | "partial" | "failed" | "pending_review";
+  recordsProcessed: number;
+  recordsRejected: number;
+  requiresReviewerAction: boolean;
+  reviewerNote?: string;
+  createdAt: string;
 };
