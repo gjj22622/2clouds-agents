@@ -1,7 +1,12 @@
 import type {
   Brain,
+  BrandBrain,
+  BrandTask,
+  ClientBrand,
   DecisionPrompt,
   KnowledgeNode,
+  RevenueSignal,
+  SeniorMemberActivity,
   TraceLog,
   TrainingTask,
   TrainingTaskAssignment,
@@ -54,6 +59,108 @@ export const brains: Brain[] = [
     owner: "Platform",
     summary: "把任務拆成可觀察、可修正、可品管的工作節點。",
     coverage: ["任務拆解", "trace log", "review loop"],
+  },
+];
+
+export const clientBrands: ClientBrand[] = [
+  {
+    id: "brand-2clouds-demo",
+    name: "2clouds Demo Brand",
+    industry: "professional services",
+    ownerUserId: reviewerUser.id,
+    operatingStage: "active",
+    positioning: "A demo client brand used to train operating judgment without exposing real client data.",
+    primaryGoal: "Turn qualified consultations into retained monthly service clients.",
+  },
+];
+
+export const brandBrains: BrandBrain[] = [
+  {
+    id: "brand-brain-2clouds-demo",
+    brandId: "brand-2clouds-demo",
+    voice: "Professional, clear, practical, and calm; avoid exaggerated claims.",
+    audience: "Small business owners comparing whether to outsource digital marketing operations.",
+    offer: "Monthly AI-assisted marketing operations with senior review and measurable execution rhythm.",
+    taboos: [
+      "Do not promise guaranteed revenue.",
+      "Do not imply fully automated strategy without senior review.",
+      "Do not use slang or hype-heavy wording.",
+    ],
+    channelRules: [
+      "Instagram posts should lead with a concrete business pain.",
+      "Sales follow-up should name the next operational step.",
+      "Monthly reports must connect content work to pipeline signals.",
+    ],
+    escalationRules: [
+      "Escalate pricing, contract scope, or guarantee requests.",
+      "Escalate when content direction changes the brand positioning.",
+    ],
+    updatedAt: "2026-05-01T08:00:00.000Z",
+  },
+];
+
+export const revenueSignals: RevenueSignal[] = [
+  {
+    id: "signal-demo-qualified-consult",
+    brandId: "brand-2clouds-demo",
+    type: "lead",
+    label: "Qualified consultation request",
+    value: "Two inbound consultations asked about monthly operating support.",
+    confidence: "medium",
+    observedAt: "2026-05-01T09:00:00.000Z",
+  },
+  {
+    id: "signal-demo-retainer-risk",
+    brandId: "brand-2clouds-demo",
+    type: "retention",
+    label: "Retainer renewal risk",
+    value: "Client asked for clearer evidence that weekly content supports sales follow-up.",
+    confidence: "high",
+    observedAt: "2026-05-01T10:30:00.000Z",
+  },
+];
+
+export const seniorMemberActivities: SeniorMemberActivity[] = [
+  {
+    id: "activity-demo-sophia-handoff",
+    brandId: "brand-2clouds-demo",
+    userId: reviewerUser.id,
+    activityType: "handoff",
+    summary: "Reviewer clarified that next content tasks must connect post topics to consultation quality.",
+    relatedBrandTaskIds: ["brand-task-demo-content-angle"],
+    createdAt: "2026-05-01T11:00:00.000Z",
+  },
+  {
+    id: "activity-demo-strategy-review",
+    brandId: "brand-2clouds-demo",
+    userId: reviewerUser.id,
+    activityType: "strategy",
+    summary: "Senior member flagged that conversion claims need softer wording and stronger evidence.",
+    relatedBrandTaskIds: ["brand-task-demo-proof-note"],
+    createdAt: "2026-05-01T12:00:00.000Z",
+  },
+];
+
+export const brandTasks: BrandTask[] = [
+  {
+    id: "brand-task-demo-content-angle",
+    brandId: "brand-2clouds-demo",
+    title: "Draft a consultation-focused content angle",
+    status: "in_progress",
+    ownerUserId: currentUser.id,
+    expectedOutcome: "A social post angle that speaks to qualified consultations without promising revenue.",
+    revenueSignalIds: ["signal-demo-qualified-consult"],
+    seniorMemberActivityIds: ["activity-demo-sophia-handoff"],
+  },
+  {
+    id: "brand-task-demo-proof-note",
+    brandId: "brand-2clouds-demo",
+    title: "Connect weekly content work to monthly report proof",
+    status: "queued",
+    ownerUserId: currentUser.id,
+    expectedOutcome: "A short proof note that links content output to sales follow-up evidence.",
+    revenueSignalIds: ["signal-demo-retainer-risk"],
+    seniorMemberActivityIds: ["activity-demo-strategy-review"],
   },
 ];
 

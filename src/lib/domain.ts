@@ -99,3 +99,66 @@ export type NewcomerDashboard = {
   decisionPrompt: DecisionPrompt;
   latestTraceLog?: TraceLog;
 };
+
+export type ClientBrand = {
+  id: string;
+  name: string;
+  industry: string;
+  ownerUserId: string;
+  operatingStage: "onboarding" | "active" | "paused";
+  positioning: string;
+  primaryGoal: string;
+};
+
+export type BrandBrain = {
+  id: string;
+  brandId: string;
+  voice: string;
+  audience: string;
+  offer: string;
+  taboos: string[];
+  channelRules: string[];
+  escalationRules: string[];
+  updatedAt: string;
+};
+
+export type BrandTaskStatus = "queued" | "in_progress" | "reviewing" | "done";
+
+export type BrandTask = {
+  id: string;
+  brandId: string;
+  title: string;
+  status: BrandTaskStatus;
+  ownerUserId: string;
+  expectedOutcome: string;
+  revenueSignalIds: string[];
+  seniorMemberActivityIds: string[];
+};
+
+export type RevenueSignal = {
+  id: string;
+  brandId: string;
+  type: "lead" | "conversion" | "retention" | "upsell";
+  label: string;
+  value: string;
+  confidence: "low" | "medium" | "high";
+  observedAt: string;
+};
+
+export type SeniorMemberActivity = {
+  id: string;
+  brandId: string;
+  userId: string;
+  activityType: "strategy" | "review" | "client_contact" | "handoff";
+  summary: string;
+  relatedBrandTaskIds: string[];
+  createdAt: string;
+};
+
+export type BrandOperatingContext = {
+  brand: ClientBrand;
+  brain: BrandBrain;
+  tasks: BrandTask[];
+  revenueSignals: RevenueSignal[];
+  seniorMemberActivities: SeniorMemberActivity[];
+};
