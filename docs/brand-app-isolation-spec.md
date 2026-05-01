@@ -97,6 +97,40 @@ SeniorMemberActivity.brandId // 必填
 
 新人被指派到品牌 ≠ 可以直接執行任務。仍需完成品牌速查卡並獲得 reviewer 確認（見 brand-onboarding-workflow.md）。
 
+### 3.3 成員工作台邊界（Member Workspace Boundary）
+
+每位成員的工作台是個人獨立的操作環境，邊界規則如下：
+
+**成員工作台包含（只看自己的部分）：**
+
+| 資料項目 | newcomer 可見範圍 | reviewer 可見範圍 |
+|---|---|---|
+| 品牌任務 | 僅自己被指派的任務 | 該品牌全部任務 |
+| 審查記錄 | 僅與自己任務相關的 | 該品牌全部審查記錄 |
+| Trace log | 僅自己的操作記錄 | 全品牌操作記錄 |
+| 訓練進度 | 僅自己的訓練進度 | — |
+| 資深成員活動 | 僅被指派品牌的 handoff/strategy | 同左 |
+| 營收訊號 | Phase 2 開放 | 該品牌全部 |
+
+**跨品牌成員隔離規則：**
+
+1. 成員在品牌 A 看到的所有任務、審查記錄、資深成員活動，在品牌 B 的工作台中完全不可見。
+2. 兩個品牌共用同一位 reviewer，該 reviewer 在各品牌的 reviewer queue 是獨立清單，互不干擾。
+3. 成員可以同時被指派多個品牌，但每次進入 Brand App 時，工作台只顯示**當前品牌**的資料。
+4. 成員間的協作只能透過：明確共享的品牌任務、審查記錄、留言、或資深成員活動記錄。不能因為「同一個人負責兩個品牌」就看到跨品牌的任何內容。
+
+**Reviewer Queue 邊界：**
+
+- Reviewer 的待審清單按品牌分組，預設顯示當前品牌的待審項目。
+- 跨品牌 reviewer 切換品牌 App 時，待審清單重置為新品牌。
+- 不得在同一個 reviewer queue 視圖中混合顯示不同品牌的待審項目。
+
+**個人 Trace Log 邊界：**
+
+- 每筆 trace log 必須攜帶 `brandId`（訓練任務的 trace log 除外，訓練 trace 不帶 brandId）。
+- 成員只能查詢自己指派品牌內的 trace log。
+- Admin 可查詢所有品牌的 trace log。
+
 ---
 
 ## 4. Brand App 最小可用資料包
