@@ -12,6 +12,13 @@ import type {
   TrainingTaskAssignment,
   User,
 } from "./domain";
+import {
+  muzopetBrand,
+  muzopetBrandBrain,
+  muzopetBrandTasks,
+  muzopetRevenueSignals,
+  muzopetSeniorMemberActivities,
+} from "./brand-packs/muzopet";
 
 export const currentUser: User = {
   id: "user-newcomer-01",
@@ -73,6 +80,7 @@ export const clientBrands: ClientBrand[] = [
     positioning: "A demo client brand used to train operating judgment without exposing real client data.",
     primaryGoal: "Turn qualified consultations into retained monthly service clients.",
   },
+  muzopetBrand,
 ];
 
 export const brandBrains: BrandBrain[] = [
@@ -98,6 +106,7 @@ export const brandBrains: BrandBrain[] = [
     ],
     updatedAt: "2026-05-01T08:00:00.000Z",
   },
+  muzopetBrandBrain,
 ];
 
 export const revenueSignals: RevenueSignal[] = [
@@ -119,6 +128,7 @@ export const revenueSignals: RevenueSignal[] = [
     confidence: "high",
     observedAt: "2026-05-01T10:30:00.000Z",
   },
+  ...muzopetRevenueSignals,
 ];
 
 export const seniorMemberActivities: SeniorMemberActivity[] = [
@@ -140,6 +150,7 @@ export const seniorMemberActivities: SeniorMemberActivity[] = [
     relatedBrandTaskIds: ["brand-task-demo-proof-note"],
     createdAt: "2026-05-01T12:00:00.000Z",
   },
+  ...muzopetSeniorMemberActivities,
 ];
 
 export const brandTasks: BrandTask[] = [
@@ -163,6 +174,7 @@ export const brandTasks: BrandTask[] = [
     revenueSignalIds: ["signal-demo-retainer-risk"],
     seniorMemberActivityIds: ["activity-demo-strategy-review"],
   },
+  ...muzopetBrandTasks,
 ];
 
 export const knowledgeNodes: KnowledgeNode[] = [
