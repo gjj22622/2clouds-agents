@@ -114,6 +114,20 @@ export const knowledgeNodes: KnowledgeNode[] = [
     summary: "新人能處理：已知素材的內容組裝、品牌腦查核、格式合規。必須升級：客戶承諾、策略方向改變、敏感議題、素材不足時的判斷。不確定時先升級，而不是自行假設。",
     source: "docs/jacky-decision-layer.md",
   },
+  {
+    id: "kg-brand-onboarding",
+    title: "進入甲方品牌的四步閱讀順序",
+    domain: "brand",
+    summary: "進入一個新品牌前，依序閱讀：老闆 Agent（溝通風格與期望）→ 主管 Agent（服務節奏與進行中專案）→ 窗口 Agent（日常溝通規則）→ 品牌 Agent（內容規格與禁忌）。閱讀完成後整理品牌速查卡送藝嘉確認，才算完成進場。",
+    source: "docs/brand-onboarding-workflow.md",
+  },
+  {
+    id: "kg-brand-risk-levels",
+    title: "品牌任務風險層級：低風險 vs. 高風險",
+    domain: "brand",
+    summary: "低風險（新人可獨立執行）：草稿檢查、素材整理、前情提要、合規初查。高風險（必須資深成員主責）：月報策略回顧、campaign 提案、危機回應文、任何含客戶承諾的輸出。判斷原則：任務輸出會直接影響客戶對双云的信任，則屬高風險。",
+    source: "docs/brand-onboarding-workflow.md",
+  },
 ];
 
 export const trainingTasks: TrainingTask[] = [
@@ -130,6 +144,17 @@ export const trainingTasks: TrainingTask[] = [
     basePoints: 10,
   },
   // Stage 2: 讀懂品牌腦
+  {
+    id: "task-brand-context-card",
+    title: "閱讀品牌包並整理品牌速查卡",
+    module: "品牌工作台",
+    stage: 2,
+    brief: "你剛被分配到一個甲方品牌。依序閱讀老闆 Agent、主管 Agent、窗口 Agent、品牌 Agent 四個節點，整理一份品牌速查卡，涵蓋：品牌核心印象、內容語氣禁忌、頻道規則摘要、升級判斷標準。速查卡送藝嘉確認後才能開始承接品牌任務。",
+    expectedOutput: "品牌速查卡（4 個區塊）：①品牌核心印象（1 句話）②語氣禁忌（3 點以內）③頻道規則差異（列主力平台）④升級判斷標準（分 Sophia / Jacky / 藝嘉）。",
+    recommendedBrainIds: ["brain-brand", "brain-member"],
+    recommendedKnowledgeNodeIds: ["kg-brand-pack", "kg-brand-onboarding", "kg-escalation"],
+    basePoints: 15,
+  },
   {
     id: "task-brand-check",
     title: "用品牌腦檢查一則貼文草稿",
@@ -216,6 +241,13 @@ export const taskAssignments: TrainingTaskAssignment[] = [
     reviewerNote: "三層架構說明清楚，下次要把「不確定的問題」寫得更具體，方便升級給 Jacky。",
   },
   {
+    id: "assignment-brand-context-card",
+    taskId: "task-brand-context-card",
+    userId: currentUser.id,
+    status: "reviewed",
+    reviewerNote: "[Structure] 四個區塊都有，格式符合。[Brand] 語氣禁忌抓得準，下次可以補上具體的「禁用詞」範例，更容易對照使用。升級標準說明清楚，進場準備完成。",
+  },
+  {
     id: "assignment-brand-check",
     taskId: "task-brand-check",
     userId: currentUser.id,
@@ -263,6 +295,14 @@ export const decisionPrompts: DecisionPrompt[] = [
     relatedKnowledgeNodeIds: ["kg-2clouds-model"],
     suggestedNextStep: "先說明每層「誰負責什麼決定」，再對照你自己在組織裡的角色。",
     escalationCondition: "如果你對双云的服務範圍或角色定位不確定，先問 Jacky 再完成摘要。",
+  },
+  {
+    taskId: "task-brand-context-card",
+    problemFraming: "你不是在「讀資料」，而是在建立一個工作地圖。速查卡的目的是讓你在做任何任務前，5 分鐘內能回想起這個品牌的邊界。",
+    recommendedModel: "老闆 Agent → 主管 Agent → 窗口 Agent → 品牌 Agent（依序閱讀）",
+    relatedKnowledgeNodeIds: ["kg-brand-pack", "kg-brand-onboarding"],
+    suggestedNextStep: "先把四個 Agent 各讀一遍，再依照速查卡格式填寫，填完對照品牌包確認沒有漏掉禁忌。",
+    escalationCondition: "品牌包裡有矛盾的規格（例如不同 Agent 對語氣的描述衝突），或合規邊界不清楚，先問藝嘉確認再完成速查卡。",
   },
   {
     taskId: "task-brand-check",
@@ -377,6 +417,33 @@ export const traceLogs: TraceLog[] = [
     fromStatus: "submitted",
     toStatus: "needs_revision",
     createdAt: "2026-04-30T15:00:00.000Z",
+  },
+  {
+    id: "trace-brand-context-card-started",
+    assignmentId: "assignment-brand-context-card",
+    actorId: currentUser.id,
+    action: "task_started",
+    fromStatus: "not_started",
+    toStatus: "in_progress",
+    createdAt: "2026-04-29T09:00:00.000Z",
+  },
+  {
+    id: "trace-brand-context-card-submitted",
+    assignmentId: "assignment-brand-context-card",
+    actorId: currentUser.id,
+    action: "task_submitted",
+    fromStatus: "in_progress",
+    toStatus: "submitted",
+    createdAt: "2026-04-29T10:30:00.000Z",
+  },
+  {
+    id: "trace-brand-context-card-reviewed",
+    assignmentId: "assignment-brand-context-card",
+    actorId: reviewerUser.id,
+    action: "review_created",
+    fromStatus: "submitted",
+    toStatus: "reviewed",
+    createdAt: "2026-04-29T14:00:00.000Z",
   },
   {
     id: "trace-brand-check-started",
