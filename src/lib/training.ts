@@ -2,6 +2,7 @@ import type {
   CertificationProgress,
   DecisionPrompt,
   NewcomerDashboard,
+  Role,
   TaskStatus,
   TraceLog,
   TrainingTask,
@@ -9,18 +10,46 @@ import type {
   User,
 } from "./domain";
 
-const statusOrder: Record<TaskStatus, number> = {
-  not_started: 0,
-  in_progress: 1,
-  submitted: 2,
-  reviewed: 3,
-};
+// All valid task status transitions, independent of actor role.
+const VALID_TRANSITIONS = new Set<string>([
+  "not_started→in_progress",
+  "in_progress→submitted",
+  "submitted→reviewed",
+  "submitted→needs_revision",
+  "needs_revision→in_progress",
+]);
 
 export function canTransitionTaskStatus(
   fromStatus: TaskStatus,
   toStatus: TaskStatus,
-) {
-  return statusOrder[toStatus] > statusOrder[fromStatus];
+): boolean {
+  return VALID_TRANSITIONS.has(`${fromStatus}→${toStatus}`);
+}
+
+// Transitions available to each role. Reviewers act on submitted tasks;
+// newcomers move their own tasks forward or pick up revisions.
+const ACTOR_TRANSITIONS: Record<Role, Partial<Record<TaskStatus, TaskStatus[]>>> = {
+  newcomer: {
+    not_started: ["in_progress"],
+    in_progress: ["submitted"],
+    needs_revision: ["in_progress"],
+  },
+  reviewer: {
+    submitted: ["reviewed", "needs_revision"],
+  },
+  admin: {
+    not_started: ["in_progress"],
+    in_progress: ["submitted"],
+    submitted: ["reviewed", "needs_revision"],
+    needs_revision: ["in_progress", "reviewed"],
+  },
+};
+
+export function getAvailableActorTransitions(
+  status: TaskStatus,
+  role: Role,
+): TaskStatus[] {
+  return ACTOR_TRANSITIONS[role]?.[status] ?? [];
 }
 
 export function createStatusTraceLog(params: {
@@ -47,6 +76,7 @@ const statusTraceActions: Record<TaskStatus, string> = {
   not_started: "task_status_reset",
   in_progress: "task_started",
   submitted: "task_submitted",
+  needs_revision: "revision_requested",
   reviewed: "review_created",
 };
 
@@ -92,6 +122,7 @@ export function calculateCertificationProgress(params: {
     .filter((assignment) => assignment.status === "reviewed")
     .reduce((sum, assignment) => sum + (taskPoints.get(assignment.taskId) ?? 0), 0);
 
+  // needs_revision is excluded: reviewer rejected the submission, it does not count yet.
   const submittedPoints = userAssignments
     .filter(
       (assignment) =>

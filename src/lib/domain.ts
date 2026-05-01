@@ -4,6 +4,7 @@ export type TaskStatus =
   | "not_started"
   | "in_progress"
   | "submitted"
+  | "needs_revision"
   | "reviewed";
 
 export type User = {
@@ -36,6 +37,7 @@ export type TrainingTask = {
   id: string;
   title: string;
   module: string;
+  stage: 1 | 2 | 3 | 4 | 5 | 6;
   brief: string;
   expectedOutput: string;
   recommendedBrainIds: string[];
