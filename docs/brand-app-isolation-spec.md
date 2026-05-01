@@ -283,3 +283,94 @@ Phase 1 中通路規則存在 `BrandBrain.channelRules`（純文字）。Phase 2
 - 任何品牌的 RevenueSignal 明細（客戶商業數據）
 - 任何品牌的 SeniorMemberActivity 文字（含客戶溝通脈絡）
 - 品牌任務的 expectedOutcome 明細
+
+---
+
+## 7. 落地實施指引
+
+### 7.1 資料查詢模式
+
+任何品牌資料查詢都必須遵循以下順序：
+
+```text
+Step 1：驗證 userId 在 brand_member_assignments 有 brandId 的有效記錄
+Step 2：所有查詢加上 WHERE brandId = :brandId
+Step 3：
+  newcomer → 再加 WHERE ownerUserId = :userId（只看自己的任務）
+  reviewer → 只加 brandId 篩選（看全品牌）
+  admin    → 無需指派驗證，但仍建議帶 brandId 避免意外全表掃描
+```
+
+具體範例：
+
+| 操作 | newcomer 查詢條件 | reviewer 查詢條件 |
+|---|---|---|
+| 取得品牌任務清單 | `brandId = X AND ownerUserId = me` | `brandId = X` |
+| 取得審查記錄 | `brandId = X AND submitterId = me` | `brandId = X` |
+| 取得 trace log | `brandId = X AND actorId = me` | `brandId = X` |
+| 取得 SeniorMemberActivity | `brandId = X` | `brandId = X` |
+| 取得 RevenueSignal | 不可取得（Phase 2 開放） | `brandId = X` |
+
+### 7.2 平台角色 vs. 品牌指派角色對照
+
+```text
+platform Role (src/lib/domain.ts)     brand_member_assignments.role
+──────────────────────────────────    ────────────────────────────────
+newcomer                          →   newcomer_trainee
+reviewer                          →   reviewer
+admin (Jacky)                     →   無需指派，admin 全覽
+```
+
+實作注意：品牌任務的權限判斷應以 `brand_member_assignments.role` 為準，而非只依賴平台 `Role`。一個成員可能是平台 `newcomer`，卻被指派為某品牌的 `lead`（進階授權）；也可能是平台 `reviewer`，但在某品牌尚未被指派任何角色（應回傳 403）。
+
+### 7.3 403 vs. 404 處理原則
+
+```text
+情境                                  正確回傳
+────────────────────────────────────  ─────────
+成員存取未被指派的品牌任何資料          403 Forbidden
+成員存取已指派品牌但不存在的資源        404 Not Found
+成員存取已指派品牌但無操作權的資源      403 Forbidden
+Admin 存取任何品牌資料                 正常回傳
+```
+
+**不應靜默回傳空陣列**。前端若收到空陣列會以為「這個品牌沒有任務」，無法區分「無資料」與「無權限」，造成誤判。
+
+### 7.4 新人進場三關驗證
+
+在允許新人看到品牌任務清單之前，後端應依序確認：
+
+```text
+關卡 1：成員指派確認
+  brand_member_assignments 中存在 { brandId, memberId, role: "newcomer_trainee" }
+
+關卡 2：品牌完整度閘門（Phase 1 入場資格）
+  BrandBrain 全欄位填寫（taboos ≥ 3 條）
+  channelRules ≥ 1 個頻道
+  escalationRules ≥ 2 條
+  RevenueSignal（近 30 天內）≥ 1 筆
+  SeniorMemberActivity type=handoff ≥ 1 筆
+  ClientBrand.operatingStage === "active"
+
+關卡 3：速查卡審核確認
+  userId 有一筆 TrainingTaskAssignment（taskId="task-brand-context-card"）
+  且 status === "reviewed"
+
+三關全通過 → 開放品牌任務清單
+任一關失敗 → 回傳具體失敗原因（非 403，而是業務錯誤說明）
+```
+
+### 7.5 RevenueSignal 建立規則
+
+`RevenueSignal` 不由新人建立，由 Sophia 或 Jacky 在以下時機手動新增：
+
+| 觸發時機 | 訊號類型 | 說明 |
+|---|---|---|
+| 新客戶簽約 / 合約更新 | `lead` | 代表業務開發里程碑 |
+| 客戶確認交付並付款 | `conversion` | 本月服務已完成交付 |
+| 客戶續約 / 增購 | `retention` 或 `upsell` | 客戶關係訊號 |
+| 客戶提出風險性反饋 | `retention`（confidence: low） | 需要關注的保客訊號 |
+
+建立時必填：`brandId`、`type`、`label`（一句說明）、`value`（觀察到的情況）、`confidence`、`observedAt`。
+
+`BrandTask.revenueSignalIds` 記錄「哪些品牌任務與這個訊號直接相關」，由建立任務的資深成員（Sophia / Jacky）填入。新人無法修改此欄位。

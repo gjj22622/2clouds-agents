@@ -204,6 +204,40 @@ Sophia 負責客戶關係，交接重點：
 
 新人進入真實品牌 4 週後，Sophia 與藝嘉會共同評估：是否可以承接更多中風險任務。
 
+### 7.4 RevenueSignal 的建立時機與責任人
+
+`RevenueSignal` 代表與品牌客戶關係相關的業務訊號。**新人不建立、不修改**此記錄；由 Sophia 或 Jacky 在下列時機手動建立：
+
+| 時機 | 訊號類型 | confidence 建議 |
+|---|---|---|
+| 新客戶第一次付款或合約確認 | `conversion` | high |
+| 客戶月報後確認繼續合作 | `retention` | high |
+| 客戶詢問增加服務項目 | `upsell` | medium |
+| 客戶提出不滿或要求改善 | `retention` | low |
+| 新客戶諮詢但尚未確認 | `lead` | low 或 medium |
+
+建立後，`BrandTask.revenueSignalIds` 由資深成員填入，標記「哪個任務與這個營收訊號直接相關」。新人看到 `revenueSignalIds` 不為空，代表這個任務有業務意義，需要更謹慎執行。
+
+### 7.5 BrandTask 與 RevenueSignal 的連結邏輯
+
+```text
+BrandTask（由資深成員建立）
+  └── revenueSignalIds: ["rev-001", "rev-002"]
+        │
+        ├── rev-001（type: conversion, confidence: high）
+        │     └── 代表：這個任務的交付成果直接對應本月收費
+        │
+        └── rev-002（type: retention, confidence: medium）
+              └── 代表：這個任務的品質會影響客戶續約判斷
+```
+
+新人判斷自己任務的業務重要性，可參考：
+- `revenueSignalIds` 數量越多 → 任務對業務影響越直接
+- 包含 `confidence: high` 的訊號 → 屬於高優先任務，不可超時
+- 包含 `type: retention` 且 `confidence: low` → 客戶關係敏感期，語氣與品質需特別謹慎
+
+**新人行動原則：** 看到 `revenueSignalIds` 不為空時，視任務風險等級提升一級處理。即使是原本歸類為「低風險」的草稿任務，若連結到 high-confidence 的 `conversion` 訊號，也應主動詢問 Sophia 是否需要額外確認。
+
 ---
 
 ## 8. 與訓練 Stage 6 認證的連結
