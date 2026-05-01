@@ -2,6 +2,7 @@ import type {
   CertificationProgress,
   DecisionPrompt,
   NewcomerDashboard,
+  ReviewDecision,
   Role,
   TaskStatus,
   TraceLog,
@@ -107,6 +108,55 @@ export function applyTaskStatusTransition(params: {
   };
 }
 
+export function applyReviewerReviewDecision(params: {
+  assignment: TrainingTaskAssignment;
+  reviewerId: string;
+  decision: ReviewDecision;
+  reviewerNote?: string;
+  reviewerScore?: number;
+  now?: Date;
+}): { assignment: TrainingTaskAssignment; traceLog: TraceLog } {
+  if (params.assignment.status !== "submitted") {
+    throw new Error(
+      `Reviewer can only review submitted assignments, received ${params.assignment.status}`,
+    );
+  }
+
+  if (
+    !getAvailableActorTransitions(params.assignment.status, "reviewer").includes(
+      params.decision,
+    )
+  ) {
+    throw new Error(`Invalid reviewer decision ${params.decision}`);
+  }
+
+  if (
+    params.reviewerScore !== undefined &&
+    (params.reviewerScore < 0 || params.reviewerScore > 100)
+  ) {
+    throw new Error("Reviewer score must be between 0 and 100");
+  }
+
+  const now = params.now ?? new Date();
+  const result = applyTaskStatusTransition({
+    assignment: params.assignment,
+    actorId: params.reviewerId,
+    toStatus: params.decision,
+    now,
+  });
+
+  return {
+    assignment: {
+      ...result.assignment,
+      reviewerId: params.reviewerId,
+      reviewerNote: params.reviewerNote,
+      reviewerScore: params.reviewerScore,
+      reviewedAt: now.toISOString(),
+    },
+    traceLog: result.traceLog,
+  };
+}
+
 export function calculateCertificationProgress(params: {
   userId: string;
   targetPoints: number;
@@ -161,6 +211,7 @@ export function buildNewcomerDashboard(params: {
 
   const active =
     assignments.find(({ assignment }) => assignment.status === "in_progress") ??
+    assignments.find(({ assignment }) => assignment.status === "needs_revision") ??
     assignments.find(({ assignment }) => assignment.status === "not_started") ??
     assignments[0];
 

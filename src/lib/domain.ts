@@ -51,7 +51,12 @@ export type TrainingTaskAssignment = {
   userId: string;
   status: TaskStatus;
   reviewerNote?: string;
+  reviewerScore?: number;
+  reviewerId?: string;
+  reviewedAt?: string;
 };
+
+export type ReviewDecision = "reviewed" | "needs_revision";
 
 export type DecisionPrompt = {
   taskId: string;

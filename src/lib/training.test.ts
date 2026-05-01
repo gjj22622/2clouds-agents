@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyReviewerReviewDecision,
   applyTaskStatusTransition,
   buildNewcomerDashboard,
   calculateCertificationProgress,
@@ -217,6 +218,32 @@ describe("createStatusTraceLog", () => {
     expect(dashboard.latestTraceLog?.id).toBe("trace-new");
   });
 
+  it("prioritizes a revision assignment before a not started assignment", () => {
+    const dashboard = buildNewcomerDashboard({
+      user: { id: "u1", name: "User", role: "newcomer", title: "Trainee" },
+      targetPoints: 60,
+      tasks,
+      assignments: [
+        { id: "a1", taskId: "task-a", userId: "u1", status: "needs_revision" },
+        { id: "a2", taskId: "task-b", userId: "u1", status: "not_started" },
+      ],
+      decisionPrompts: [
+        {
+          taskId: "task-a",
+          problemFraming: "Frame the revision.",
+          recommendedModel: "Revision model",
+          relatedKnowledgeNodeIds: [],
+          suggestedNextStep: "Revise first.",
+          escalationCondition: "Escalate when feedback is unclear.",
+        },
+      ],
+      traceLogs: [],
+    });
+
+    expect(dashboard.activeAssignment.id).toBe("a1");
+    expect(dashboard.activeTask.id).toBe("task-a");
+  });
+
   it("creates a trace log for needs_revision", () => {
     const log = createStatusTraceLog({
       assignmentId: "a2",
@@ -229,5 +256,72 @@ describe("createStatusTraceLog", () => {
     expect(log.action).toBe("revision_requested");
     expect(log.toStatus).toBe("needs_revision");
     expect(log.actorId).toBe("reviewer-01");
+  });
+});
+
+describe("applyReviewerReviewDecision", () => {
+  it("marks a submitted assignment as reviewed with reviewer metadata", () => {
+    const result = applyReviewerReviewDecision({
+      assignment: {
+        id: "a1",
+        taskId: "task-a",
+        userId: "u1",
+        status: "submitted",
+      },
+      reviewerId: "reviewer-01",
+      decision: "reviewed",
+      reviewerNote: "Meets the delivery bar.",
+      reviewerScore: 86,
+      now: new Date("2026-05-01T09:00:00.000Z"),
+    });
+
+    expect(result.assignment.status).toBe("reviewed");
+    expect(result.assignment.reviewerId).toBe("reviewer-01");
+    expect(result.assignment.reviewerNote).toBe("Meets the delivery bar.");
+    expect(result.assignment.reviewerScore).toBe(86);
+    expect(result.assignment.reviewedAt).toBe("2026-05-01T09:00:00.000Z");
+    expect(result.traceLog.action).toBe("review_created");
+    expect(result.traceLog.fromStatus).toBe("submitted");
+    expect(result.traceLog.toStatus).toBe("reviewed");
+  });
+
+  it("marks a submitted assignment as needs_revision with reviewer feedback", () => {
+    const result = applyReviewerReviewDecision({
+      assignment: {
+        id: "a2",
+        taskId: "task-b",
+        userId: "u1",
+        status: "submitted",
+      },
+      reviewerId: "reviewer-01",
+      decision: "needs_revision",
+      reviewerNote: "CTA does not match the brand brain.",
+      reviewerScore: 52,
+      now: new Date("2026-05-01T10:00:00.000Z"),
+    });
+
+    expect(result.assignment.status).toBe("needs_revision");
+    expect(result.assignment.reviewerNote).toBe(
+      "CTA does not match the brand brain.",
+    );
+    expect(result.assignment.reviewerScore).toBe(52);
+    expect(result.assignment.reviewedAt).toBe("2026-05-01T10:00:00.000Z");
+    expect(result.traceLog.action).toBe("revision_requested");
+    expect(result.traceLog.toStatus).toBe("needs_revision");
+  });
+
+  it("rejects review decisions for assignments that are not submitted", () => {
+    expect(() =>
+      applyReviewerReviewDecision({
+        assignment: {
+          id: "a3",
+          taskId: "task-b",
+          userId: "u1",
+          status: "in_progress",
+        },
+        reviewerId: "reviewer-01",
+        decision: "reviewed",
+      }),
+    ).toThrow("Reviewer can only review submitted assignments");
   });
 });
