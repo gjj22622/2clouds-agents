@@ -16,6 +16,13 @@ import {
 const users = [currentUser, reviewerUser];
 
 describe("brand operating context", () => {
+  it("keeps the demo and MuzoPet brands visible in runtime data", () => {
+    expect(clientBrands.map((brand) => brand.id)).toEqual([
+      "brand-2clouds-demo",
+      "brand-muzopet",
+    ]);
+  });
+
   it("builds the operating context for a client brand", () => {
     const context = buildBrandOperatingContext({
       brandId: "brand-2clouds-demo",
@@ -36,6 +43,29 @@ describe("brand operating context", () => {
     expect(context.tasks.length).toBeGreaterThan(0);
     expect(context.revenueSignals.length).toBeGreaterThan(0);
     expect(context.seniorMemberActivities.length).toBeGreaterThan(0);
+  });
+
+  it("builds the operating context for brand-muzopet", () => {
+    const context = buildBrandOperatingContext({
+      brandId: "brand-muzopet",
+      brands: clientBrands,
+      brandBrains,
+      brandTasks,
+      revenueSignals,
+      seniorMemberActivities,
+      users,
+    });
+
+    expect(context.brand.name).toBe("木酢寵物達人");
+    expect(context.brand.ownerUserId).toBe(reviewerUser.id);
+    expect(context.assignedMembers.map((member) => member.id)).toEqual([
+      reviewerUser.id,
+      currentUser.id,
+    ]);
+    expect(context.tasks).toHaveLength(3);
+    expect(context.revenueSignals).toHaveLength(3);
+    expect(context.seniorMemberActivities).toHaveLength(3);
+    expect(context.brain.brandId).toBe("brand-muzopet");
   });
 
   it("links a brand task to its revenue signal", () => {
