@@ -54,9 +54,9 @@ export default async function BrandDetailPage({
   const brandTasks = trainingTasks.slice(1, 4);
 
   return (
-    <div className="brand-app-shell" style={{ margin: "-32px", padding: "32px", background: "var(--surface)", minHeight: "calc(100vh - 64px)" }}>
+    <div className="brand-app-shell">
       {/* Brand App Sub-header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "32px", borderBottom: "2px solid var(--sy-mist)", paddingBottom: "20px" }}>
+      <div className="brand-sub-nav">
         <div>
           <div className="meta-row" style={{ gap: "8px", marginBottom: "8px" }}>
             <Link href="/brands" className="badge" style={{ background: "var(--sy-paper)", cursor: "pointer" }}>← Back to Command Center</Link>
@@ -65,19 +65,19 @@ export default async function BrandDetailPage({
           <h1 style={{ margin: 0, fontSize: "36px" }}>{brandName}</h1>
         </div>
         
-        <nav className="nav" style={{ marginBottom: "-21px" }}>
-          <span className="active" style={{ padding: "12px 20px", borderBottom: "3px solid var(--primary)", borderRadius: 0 }}>Dashboard</span>
-          <span style={{ padding: "12px 20px", color: "var(--text-muted)" }}>Brand Brain</span>
-          <span style={{ padding: "12px 20px", color: "var(--text-muted)" }}>Tasks</span>
-          <span style={{ padding: "12px 20px", color: "var(--text-muted)" }}>Performance</span>
-          <span style={{ padding: "12px 20px", color: "var(--text-muted)" }}>Settings</span>
+        <nav>
+          <span className="active">Dashboard</span>
+          <span>Brand Brain</span>
+          <span>Tasks</span>
+          <span>Performance</span>
+          <span>Settings</span>
         </nav>
       </div>
 
       <div className="page-grid">
         <div className="stack" style={{ gap: "32px" }}>
           {/* Main Content Area */}
-          <div className="section" style={{ border: "2px solid var(--sy-mist)", boxShadow: "none" }}>
+          <div className="section isolated-section">
             <div className="section-header">
               <div>
                 <div className="eyebrow">Operational Focus</div>
@@ -107,19 +107,28 @@ export default async function BrandDetailPage({
 
           <div className="metric-grid">
             <section className="section" style={{ boxShadow: "none", border: "1px solid var(--line)" }}>
-              <div className="eyebrow">Knowledge</div>
-              <h3 style={{ marginTop: "8px" }}>品牌腦模組</h3>
-              <p style={{ fontSize: "14px", color: "var(--text-muted)", marginBottom: "16px" }}>
-                {brandBrain.summary}
-              </p>
-              <div className="meta-row" style={{ gap: "6px" }}>
-                {brandBrain.coverage.map((c) => (
-                  <span className="badge" key={c} style={{ fontSize: "10px" }}>{c}</span>
-                ))}
+              <div className="eyebrow">Intelligence</div>
+              <h3 style={{ marginTop: "8px" }}>核心腦模組</h3>
+              <div className="stack" style={{ gap: "12px", marginTop: "16px" }}>
+                <div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--sy-deep)" }}>BRAND BRAIN</div>
+                  <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: "4px 0" }}>
+                    {brandBrain.summary}
+                  </p>
+                </div>
+                <div style={{ borderTop: "1px solid var(--sy-line)", paddingTop: "12px" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--sy-gray)" }}>PRODUCT BRAIN</div>
+                  <p style={{ fontSize: "13px", color: "var(--sy-gray)", fontStyle: "italic", margin: "4px 0" }}>
+                    尚未導入產品規格與賣點數據。
+                  </p>
+                </div>
+                <div style={{ borderTop: "1px solid var(--sy-line)", paddingTop: "12px" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--sy-gray)" }}>CUSTOMER BRAIN</div>
+                  <p style={{ fontSize: "13px", color: "var(--sy-gray)", fontStyle: "italic", margin: "4px 0" }}>
+                    尚未導入受眾畫像與購買行為分析。
+                  </p>
+                </div>
               </div>
-              <Link href="#" style={{ display: "block", marginTop: "16px", fontSize: "13px", color: "var(--primary)", fontWeight: 700 }}>
-                Open full Brand Brain →
-              </Link>
             </section>
             
             <section className="section" style={{ boxShadow: "none", border: "1px solid var(--line)" }}>
@@ -143,11 +152,11 @@ export default async function BrandDetailPage({
             <h2 style={{ fontSize: "20px", marginTop: "8px" }}>營收訊號</h2>
             <div className="stack" style={{ gap: "12px", marginTop: "20px" }}>
               {revenueSignals.map((signal) => (
-                <div key={signal.label} style={{ padding: "16px", background: "white", borderRadius: "var(--radius)", border: "1px solid var(--sy-line)" }}>
-                  <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 700, textTransform: "uppercase" }}>{signal.label}</div>
+                <div key={signal.label} className="signal-card">
+                  <div className="signal-label">{signal.label}</div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginTop: "8px" }}>
-                    <span style={{ fontSize: "24px", fontWeight: 800, color: "var(--sy-ink)" }}>{signal.value}</span>
-                    <span style={{ fontSize: "12px", fontWeight: 700, color: signal.type === "positive" ? "var(--success)" : "var(--sy-gray)" }}>
+                    <span className="signal-value">{signal.value}</span>
+                    <span className={`signal-trend ${signal.type === "positive" ? "positive" : "neutral"}`}>
                       {signal.trend}
                     </span>
                   </div>

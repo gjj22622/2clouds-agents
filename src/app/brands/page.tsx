@@ -26,10 +26,10 @@ const mockBrands = [
 export default function BrandsPage() {
   return (
     <div className="stack" style={{ gap: "32px" }}>
-      <header className="section" style={{ background: "var(--sy-deep)", color: "white", border: "none" }}>
-        <div className="eyebrow" style={{ color: "var(--sy-teal)" }}>2clouds Command Center</div>
-        <h1 style={{ color: "white", marginBottom: "8px" }}>品牌目錄管理</h1>
-        <p style={{ color: "var(--sy-mist)", maxWidth: "600px" }}>
+      <header className="section command-center-header">
+        <div className="eyebrow">2clouds Command Center</div>
+        <h1>品牌目錄管理</h1>
+        <p>
           管理所有客戶品牌的獨立營運空間。監控各品牌進度、成員指派與系統健康狀態。
         </p>
       </header>

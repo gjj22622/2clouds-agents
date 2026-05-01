@@ -403,11 +403,104 @@ p:last-child {
   font-size: 12px;
   font-weight: 500;
 }
-
 .trace-label {
   color: var(--sy-ink);
   font-size: 14px;
   font-weight: 600;
+}
+
+/* Brand App Shell & Command Center Styles */
+.brand-app-shell {
+  background: var(--surface);
+  margin: -32px;
+  min-height: calc(100vh - 64px);
+  padding: 32px;
+}
+
+.command-center-header {
+  background: var(--sy-deep);
+  border: none;
+  color: white;
+}
+
+.command-center-header .eyebrow {
+  color: var(--sy-teal);
+}
+
+.command-center-header h1 {
+  color: white;
+  margin-bottom: 8px;
+}
+
+.command-center-header p {
+  color: var(--sy-mist);
+  max-width: 600px;
+}
+
+.brand-sub-nav {
+  border-bottom: 2px solid var(--sy-mist);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+}
+
+.brand-sub-nav nav {
+  margin-bottom: -21px;
+}
+
+.brand-sub-nav nav span, 
+.brand-sub-nav nav a {
+  cursor: pointer;
+  padding: 12px 20px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.brand-sub-nav nav span.active,
+.brand-sub-nav nav a.active {
+  border-bottom: 3px solid var(--primary);
+  color: var(--primary);
+}
+
+.signal-card {
+  background: white;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.signal-label {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.signal-value {
+  color: var(--sy-ink);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.signal-trend {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.signal-trend.positive {
+  color: var(--success);
+}
+
+.signal-trend.neutral {
+  color: var(--sy-gray);
+}
+
+.isolated-section {
+  border: 2px solid var(--sy-mist);
+  box-shadow: none;
 }
 
 .button,
