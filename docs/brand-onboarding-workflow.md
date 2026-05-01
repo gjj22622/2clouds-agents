@@ -204,6 +204,40 @@ Sophia 負責客戶關係，交接重點：
 
 新人進入真實品牌 4 週後，Sophia 與藝嘉會共同評估：是否可以承接更多中風險任務。
 
+### 7.4 RevenueSignal 的建立時機與責任人
+
+`RevenueSignal` 代表與品牌客戶關係相關的業務訊號。**新人不建立、不修改**此記錄；由 Sophia 或 Jacky 在下列時機手動建立：
+
+| 時機 | 訊號類型 | confidence 建議 |
+|---|---|---|
+| 新客戶第一次付款或合約確認 | `conversion` | high |
+| 客戶月報後確認繼續合作 | `retention` | high |
+| 客戶詢問增加服務項目 | `upsell` | medium |
+| 客戶提出不滿或要求改善 | `retention` | low |
+| 新客戶諮詢但尚未確認 | `lead` | low 或 medium |
+
+建立後，`BrandTask.revenueSignalIds` 由資深成員填入，標記「哪個任務與這個營收訊號直接相關」。新人看到 `revenueSignalIds` 不為空，代表這個任務有業務意義，需要更謹慎執行。
+
+### 7.5 BrandTask 與 RevenueSignal 的連結邏輯
+
+```text
+BrandTask（由資深成員建立）
+  └── revenueSignalIds: ["rev-001", "rev-002"]
+        │
+        ├── rev-001（type: conversion, confidence: high）
+        │     └── 代表：這個任務的交付成果直接對應本月收費
+        │
+        └── rev-002（type: retention, confidence: medium）
+              └── 代表：這個任務的品質會影響客戶續約判斷
+```
+
+新人判斷自己任務的業務重要性，可參考：
+- `revenueSignalIds` 數量越多 → 任務對業務影響越直接
+- 包含 `confidence: high` 的訊號 → 屬於高優先任務，不可超時
+- 包含 `type: retention` 且 `confidence: low` → 客戶關係敏感期，語氣與品質需特別謹慎
+
+**新人行動原則：** 看到 `revenueSignalIds` 不為空時，視任務風險等級提升一級處理。即使是原本歸類為「低風險」的草稿任務，若連結到 high-confidence 的 `conversion` 訊號，也應主動詢問 Sophia 是否需要額外確認。
+
 ---
 
 ## 8. 與訓練 Stage 6 認證的連結
@@ -214,3 +248,85 @@ Sophia 負責客戶關係，交接重點：
 - 升級判斷符合認證標準（在該升級時升級、不必要時不打擾資深成員）
 
 Stage 6 認證完成後，Jacky 決定是否正式將新人列為某品牌的「日常任務承接人」。
+
+---
+
+## 9. 第一天工作流程（Day 1 Checklist）
+
+以下是新人被指派到真實品牌的第一天標準流程。每個步驟都要在平台上留下 trace log。
+
+**前提：** Sophia 已完成進場 Handoff 說明（SeniorMemberActivity type: handoff 已建立）。
+
+### 上午：品牌腦閱讀（2-3 小時）
+
+```
+□ Step 1：開啟品牌工作台，確認 Brand App 已完成資料填寫
+   → 確認 BrandBrain 的 voice / taboos / channelRules 都有內容
+   → 確認有至少 1 筆 SeniorMemberActivity（handoff）可閱讀
+
+□ Step 2：依序閱讀品牌腦四個 Agent（見 Section 2）
+   老闆 Agent → 主管 Agent → 窗口 Agent → 品牌 Agent
+   每個 Agent 閱讀完記錄 1 個「你認為最重要的工作行為原則」
+
+□ Step 3：閱讀 SeniorMemberActivity 的 Handoff 記錄
+   理解品牌目前狀態、近期任務重點、注意事項
+```
+
+### 午前：品牌速查卡（1-1.5 小時）
+
+```
+□ Step 4：開啟「閱讀品牌包並整理品牌速查卡」任務（task-brand-context-card）
+   填寫 4 個區塊：
+   ① 品牌核心印象（1 句話）
+   ② 語氣禁忌（3 點以內）
+   ③ 頻道規則差異（列主力平台）
+   ④ 升級判斷標準（分 Sophia / Jacky / 藝嘉）
+
+□ Step 5：完成後送出（submitted），等藝嘉確認
+   → 在送出前先自我品管：對照品牌腦確認沒有漏掉任何禁忌
+   → 在 trace log 留下「完成首次品牌速查卡」的備注
+```
+
+### 午後：資深成員確認（等待中）
+
+```
+□ Step 6：等待藝嘉的速查卡審查結果
+   → 如果收到 needs_revision，看清楚 reviewer note，修正後重新送出
+   → 速查卡通過 (reviewed) 前，不開始任何品牌任務
+
+□ Step 7：如速查卡當天未能確認，利用等待時間：
+   → 閱讀平台的 kg-brand-onboarding 知識節點
+   → 看一遍品牌的 RevenueSignal，了解品牌目前的業務信號
+   → 整理 3 個「明天想問 Sophia 的問題」（不要現在問，集中提問）
+```
+
+### 傍晚：確認第一個任務（速查卡通過後）
+
+```
+□ Step 8：Sophia 或藝嘉分配第一個低風險任務
+   → 確認任務的 expectedOutcome
+   → 確認任務屬於低風險（草稿檢查 / 素材整理 / 前情提要）
+   → 如果任務屬於中高風險，告知 Sophia 說明你目前的能力邊界
+
+□ Step 9：第一天結束前，記錄今日工作摘要到 trace log
+   → 哪些品牌腦節點已讀完
+   → 速查卡的審查結果
+   → 第一個任務的啟動狀態
+   → 有沒有不確定的問題需要明天問 Sophia
+
+□ Step 10：將集中的問題用文字整理，傳給 Sophia（LINE 或內部管道）
+   → 格式：「問題 + 你目前的理解 + 你想確認什麼」
+   → 不要只問「我不知道怎麼做」，要說明你的困惑點
+```
+
+### 第一天完成標準
+
+| 確認項目 | 完成條件 |
+|---|---|
+| 品牌腦閱讀 | 四個 Agent 都閱讀過，每個有 1 點重點記錄 |
+| 速查卡送出 | 已標記為 submitted 或 reviewed |
+| Handoff 記錄閱讀 | SeniorMemberActivity 已閱讀 |
+| 問題整理 | 至少 3 個問題已整理成文字傳給 Sophia |
+| Trace log | 今日有至少 1 筆 trace 記錄 |
+
+**如果速查卡當天未能通過審查（藝嘉較忙），第一天的完成標準仍以「送出速查卡」為準。不要因為等待就停止準備。**

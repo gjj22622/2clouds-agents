@@ -160,6 +160,31 @@ Do not build a generic "all brands mixed together" task board. Build brand-scope
 
 When the architecture is uncertain, consult Jacky Wiki and document the resulting decision before implementing large changes.
 
+## Isolation Specification
+
+The data boundary, permission boundary, minimum viable data pack, and completeness scoring are formally defined in:
+
+→ **[docs/brand-app-isolation-spec.md](./brand-app-isolation-spec.md)**
+
+Key rules:
+- Every brand entity must carry `brandId` — no exceptions.
+- Members can only access brands they are explicitly assigned to.
+- Command Center may aggregate status counts but must not expose private brand detail cross-brand.
+- Before a newcomer enters a brand, the brand's Phase 1 data pack must pass the completeness gate.
+
+## Newcomer Brand Entry Workflow
+
+How a newcomer moves from training to real brand operations, including Day 1 checklist:
+
+→ **[docs/brand-onboarding-workflow.md](./brand-onboarding-workflow.md)**
+
+## Brand Intake
+
+How to collect and structure brand data before onboarding:
+
+→ **[docs/brand-intake-checklist.md](./brand-intake-checklist.md)**
+→ **[docs/mujiso-intake-prep.md](./mujiso-intake-prep.md)** (木酢寵物達人 — placeholder only)
+
 ## Next Product Direction
 
 The next major slice should be:
@@ -176,3 +201,4 @@ Acceptance criteria:
 - all brand data in domain models is scoped by `brandId`
 - member-specific work can be scoped by member or assignee
 - no brand-specific skill or prompt context is shared across brands by default
+- brand app completeness gate is checked before newcomer can enter the brand workspace
