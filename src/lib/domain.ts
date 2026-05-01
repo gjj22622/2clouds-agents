@@ -105,6 +105,7 @@ export type ClientBrand = {
   name: string;
   industry: string;
   ownerUserId: string;
+  assignedMemberIds: string[];
   operatingStage: "onboarding" | "active" | "paused";
   positioning: string;
   primaryGoal: string;
@@ -158,6 +159,7 @@ export type SeniorMemberActivity = {
 export type BrandOperatingContext = {
   brand: ClientBrand;
   brain: BrandBrain;
+  assignedMembers: User[];
   tasks: BrandTask[];
   revenueSignals: RevenueSignal[];
   seniorMemberActivities: SeniorMemberActivity[];

@@ -5,6 +5,7 @@ import type {
   ClientBrand,
   RevenueSignal,
   SeniorMemberActivity,
+  User,
 } from "./domain";
 
 export function buildBrandOperatingContext(params: {
@@ -14,6 +15,7 @@ export function buildBrandOperatingContext(params: {
   brandTasks: BrandTask[];
   revenueSignals: RevenueSignal[];
   seniorMemberActivities: SeniorMemberActivity[];
+  users: User[];
 }): BrandOperatingContext {
   const brand = params.brands.find((candidate) => candidate.id === params.brandId);
 
@@ -32,6 +34,10 @@ export function buildBrandOperatingContext(params: {
   return {
     brand,
     brain,
+    assignedMembers: brand.assignedMemberIds.flatMap((memberId) => {
+      const user = params.users.find((candidate) => candidate.id === memberId);
+      return user ? [user] : [];
+    }),
     tasks: params.brandTasks.filter((task) => task.brandId === brand.id),
     revenueSignals: params.revenueSignals.filter(
       (signal) => signal.brandId === brand.id,

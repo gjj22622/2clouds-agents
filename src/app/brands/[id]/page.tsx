@@ -1,5 +1,36 @@
-import { brains, trainingTasks, taskAssignments, reviewerUser } from "@/lib/seed";
-import { TaskCard } from "@/components/TaskCard";
+import { notFound } from "next/navigation";
+import {
+  buildBrandOperatingContext,
+  getRevenueSignalsForBrandTask,
+} from "@/lib/brands";
+import {
+  brandBrains,
+  brandTasks,
+  clientBrands,
+  currentUser,
+  revenueSignals,
+  reviewerUser,
+  seniorMemberActivities,
+} from "@/lib/seed";
+
+const users = [currentUser, reviewerUser];
+
+const stageLabels = {
+  onboarding: "導入中",
+  active: "營運中",
+  paused: "暫停",
+};
+
+const taskStatusLabels = {
+  queued: "排程中",
+  in_progress: "進行中",
+  reviewing: "待審",
+  done: "完成",
+};
+
+function userName(userId: string) {
+  return users.find((user) => user.id === userId)?.name ?? userId;
+}
 
 export default async function BrandDetailPage({
   params,
@@ -8,76 +39,92 @@ export default async function BrandDetailPage({
 }) {
   const { id } = await params;
 
-  // Use the existing brand brain from seed
-  const brandBrain = brains.find((b) => b.type === "brand")!;
-
-  // Mock signals and recent actions
-  const revenueSignals = [
-    { label: "本月營收貢獻", value: "$12,400", trend: "+12%", type: "positive" },
-    { label: "ROAS (平均)", value: "4.2", trend: "-2%", type: "neutral" },
-    { label: "新客成本 (CAC)", value: "$15.5", trend: "-5%", type: "positive" },
-  ];
-
-  const recentActions = [
-    {
-      id: "a1",
-      user: reviewerUser.name,
-      action: "更新了品牌語氣規範",
-      time: "2 小時前",
-      target: "Brand Brain",
-    },
-    {
-      id: "a2",
-      user: "Sophia",
-      action: "導入了 Q3 促銷素材包",
-      time: "5 小時前",
-      target: "Asset Library",
-    },
-    {
-      id: "a3",
-      user: "Jacky",
-      action: "修正了高風險升級判斷邏輯",
-      time: "昨天",
-      target: "Decision Model",
-    },
-  ];
-
-  // Get some tasks to show as "Today's Tasks"
-  const brandTasks = trainingTasks.slice(1, 4);
+  let context;
+  try {
+    context = buildBrandOperatingContext({
+      brandId: id,
+      brands: clientBrands,
+      brandBrains,
+      brandTasks,
+      revenueSignals,
+      seniorMemberActivities,
+      users,
+    });
+  } catch {
+    notFound();
+  }
 
   return (
     <div className="page-grid">
       <div className="stack">
-        <header className="section" style={{ background: "var(--sy-cloud)", border: "none" }}>
-          <div className="eyebrow">Brand Workspace</div>
-          <h1>{id === "demo-brand" ? "双云行銷 (Demo)" : id}</h1>
-          <p style={{ maxWidth: "600px" }}>
-            這是該品牌的營運中心。在這裡你可以查閱品牌腦、執行任務，並觀察資深成員的決策痕跡。
-          </p>
+        <header className="section">
+          <div className="section-header">
+            <div>
+              <div className="eyebrow">Brand App · {context.brand.id}</div>
+              <h1>{context.brand.name}</h1>
+              <p>{context.brand.positioning}</p>
+            </div>
+            <span className="badge reviewed">
+              {stageLabels[context.brand.operatingStage]}
+            </span>
+          </div>
+
+          <div className="metric-grid">
+            <div className="metric">
+              <span className="metric-value">{context.assignedMembers.length}</span>
+              <span className="metric-label">指派成員</span>
+            </div>
+            <div className="metric">
+              <span className="metric-value">{context.tasks.length}</span>
+              <span className="metric-label">日常任務</span>
+            </div>
+            <div className="metric">
+              <span className="metric-value">{context.revenueSignals.length}</span>
+              <span className="metric-label">營收訊號</span>
+            </div>
+          </div>
         </header>
 
         <section className="section">
           <div className="section-header">
             <div>
               <div className="eyebrow">Brand Brain</div>
-              <h2>品牌腦摘要</h2>
+              <h2>品牌腦模組</h2>
+              <p>此區只載入 {context.brand.name} 的品牌腦，不與其他品牌共用。</p>
             </div>
           </div>
-          <p style={{ marginBottom: "16px", color: "var(--sy-ink)", fontWeight: 500 }}>
-            {brandBrain.summary}
-          </p>
-          <div className="stack" style={{ gap: "12px" }}>
+
+          <div className="stack">
             <div className="decision-block">
-              <h3 style={{ fontSize: "14px", color: "var(--sy-gray)", textTransform: "uppercase" }}>覆蓋範圍</h3>
+              <h3>定位與受眾</h3>
+              <p>{context.brain.audience}</p>
+              <p>{context.brain.offer}</p>
+            </div>
+            <div className="decision-block">
+              <h3>語氣規範</h3>
+              <p>{context.brain.voice}</p>
+            </div>
+            <div className="decision-block">
+              <h3>禁忌與升級</h3>
               <div className="meta-row">
-                {brandBrain.coverage.map((c) => (
-                  <span className="badge" key={c}>{c}</span>
-                ))}
+                {[...context.brain.taboos, ...context.brain.escalationRules].map(
+                  (rule) => (
+                    <span className="badge" key={rule}>
+                      {rule}
+                    </span>
+                  ),
+                )}
               </div>
             </div>
             <div className="decision-block">
-              <h3 style={{ fontSize: "14px", color: "var(--sy-gray)", textTransform: "uppercase" }}>維護者</h3>
-              <p style={{ fontSize: "14px" }}>{brandBrain.owner}</p>
+              <h3>頻道規則</h3>
+              <div className="meta-row">
+                {context.brain.channelRules.map((rule) => (
+                  <span className="badge" key={rule}>
+                    {rule}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -85,25 +132,44 @@ export default async function BrandDetailPage({
         <section className="section">
           <header className="section-header">
             <div>
-              <div className="eyebrow">Operations</div>
-              <h2>今日任務</h2>
-              <p>當前需要完成的品牌相關任務。</p>
+              <div className="eyebrow">Daily Tasks</div>
+              <h2>日常任務</h2>
+              <p>任務、營收訊號與資深成員活動都以 brandId 綁定。</p>
             </div>
           </header>
           <div className="card-list">
-            {brandTasks.map((task) => {
-              const assignment = taskAssignments.find(a => a.taskId === task.id) || {
-                id: `temp-${task.id}`,
-                taskId: task.id,
-                userId: "user-newcomer-01",
-                status: "not_started" as const
-              };
+            {context.tasks.map((task) => {
+              const linkedSignals = getRevenueSignalsForBrandTask({
+                task,
+                revenueSignals: context.revenueSignals,
+              });
+              const linkedActivities = context.seniorMemberActivities.filter(
+                (activity) => task.seniorMemberActivityIds.includes(activity.id),
+              );
+
               return (
-                <TaskCard
-                  assignment={assignment}
-                  key={task.id}
-                  task={task}
-                />
+                <article className="task-card" key={task.id}>
+                  <div className="section-header" style={{ marginBottom: 0 }}>
+                    <div>
+                      <div className="eyebrow">Owner · {userName(task.ownerUserId)}</div>
+                      <h3>{task.title}</h3>
+                    </div>
+                    <span className="badge">{taskStatusLabels[task.status]}</span>
+                  </div>
+                  <p>{task.expectedOutcome}</p>
+                  <div className="meta-row">
+                    {linkedSignals.map((signal) => (
+                      <span className="badge submitted" key={signal.id}>
+                        {signal.label}
+                      </span>
+                    ))}
+                    {linkedActivities.map((activity) => (
+                      <span className="badge" key={activity.id}>
+                        {activity.activityType}: {userName(activity.userId)}
+                      </span>
+                    ))}
+                  </div>
+                </article>
               );
             })}
           </div>
@@ -112,17 +178,17 @@ export default async function BrandDetailPage({
 
       <aside className="stack">
         <section className="section">
-          <div className="eyebrow">Signals</div>
-          <h2 style={{ fontSize: "18px" }}>營收貢獻訊號</h2>
-          <div className="stack" style={{ gap: "12px", marginTop: "16px" }}>
-            {revenueSignals.map((signal) => (
-              <div key={signal.label} style={{ padding: "12px", background: "var(--sy-paper)", borderRadius: "var(--radius)" }}>
-                <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{signal.label}</div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginTop: "4px" }}>
-                  <span style={{ fontSize: "20px", fontWeight: 800 }}>{signal.value}</span>
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: signal.type === "positive" ? "var(--success)" : "var(--sy-gray)" }}>
-                    {signal.trend}
-                  </span>
+          <div className="eyebrow">Member Assignment</div>
+          <h2>成員指派</h2>
+          <div className="card-list">
+            {context.assignedMembers.map((member) => (
+              <div className="brain-card" key={member.id}>
+                <div className="section-header" style={{ marginBottom: 0 }}>
+                  <div>
+                    <h3>{member.name}</h3>
+                    <p>{member.title}</p>
+                  </div>
+                  <span className="badge">{member.role}</span>
                 </div>
               </div>
             ))}
@@ -130,18 +196,44 @@ export default async function BrandDetailPage({
         </section>
 
         <section className="section">
-          <div className="eyebrow">Recent Activity</div>
-          <h2 style={{ fontSize: "18px" }}>資深成員操作</h2>
-          <div className="trace-list" style={{ marginTop: "16px" }}>
-            {recentActions.map((action, index) => (
-              <div className="trace-row" key={action.id} style={{ paddingBottom: index === recentActions.length - 1 ? 0 : "20px" }}>
+          <div className="eyebrow">Revenue Signals</div>
+          <h2>營收訊號</h2>
+          <div className="card-list">
+            {context.revenueSignals.map((signal) => (
+              <div className="brain-card" key={signal.id}>
+                <div className="meta-row">
+                  <span className="badge submitted">{signal.type}</span>
+                  <span className="badge">{signal.confidence}</span>
+                </div>
+                <h3>{signal.label}</h3>
+                <p>{signal.value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="eyebrow">Senior Activity</div>
+          <h2>資深成員活動</h2>
+          <div className="trace-list">
+            {context.seniorMemberActivities.map((activity) => (
+              <div className="trace-row active" key={activity.id}>
                 <div className="trace-content">
                   <div className="trace-meta">
-                    <span className="trace-label" style={{ fontSize: "13px" }}>{action.user}</span>
-                    <time className="trace-time">{action.time}</time>
+                    <span className="trace-label">{userName(activity.userId)}</span>
+                    <time className="trace-time">
+                      {new Date(activity.createdAt).toLocaleString("zh-TW", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </time>
                   </div>
-                  <p style={{ fontSize: "14px", color: "var(--sy-ink)", marginBottom: 4 }}>{action.action}</p>
-                  <span className="badge" style={{ fontSize: "10px", padding: "2px 6px", width: "fit-content" }}>{action.target}</span>
+                  <p>{activity.summary}</p>
+                  <span className="badge" style={{ width: "fit-content" }}>
+                    {activity.activityType}
+                  </span>
                 </div>
               </div>
             ))}

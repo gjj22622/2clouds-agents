@@ -68,6 +68,7 @@ export const clientBrands: ClientBrand[] = [
     name: "2clouds Demo Brand",
     industry: "professional services",
     ownerUserId: reviewerUser.id,
+    assignedMemberIds: [reviewerUser.id, currentUser.id],
     operatingStage: "active",
     positioning: "A demo client brand used to train operating judgment without exposing real client data.",
     primaryGoal: "Turn qualified consultations into retained monthly service clients.",

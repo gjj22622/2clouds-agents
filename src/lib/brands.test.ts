@@ -7,9 +7,13 @@ import {
   brandBrains,
   brandTasks,
   clientBrands,
+  currentUser,
   revenueSignals,
+  reviewerUser,
   seniorMemberActivities,
 } from "./seed";
+
+const users = [currentUser, reviewerUser];
 
 describe("brand operating context", () => {
   it("builds the operating context for a client brand", () => {
@@ -20,10 +24,15 @@ describe("brand operating context", () => {
       brandTasks,
       revenueSignals,
       seniorMemberActivities,
+      users,
     });
 
     expect(context.brand.name).toBe("2clouds Demo Brand");
     expect(context.brain.brandId).toBe(context.brand.id);
+    expect(context.assignedMembers.map((member) => member.id)).toEqual([
+      reviewerUser.id,
+      currentUser.id,
+    ]);
     expect(context.tasks.length).toBeGreaterThan(0);
     expect(context.revenueSignals.length).toBeGreaterThan(0);
     expect(context.seniorMemberActivities.length).toBeGreaterThan(0);
@@ -55,7 +64,52 @@ describe("brand operating context", () => {
         brandTasks,
         revenueSignals,
         seniorMemberActivities,
+        users,
       }),
     ).toThrow("Brand missing-brand was not found");
+  });
+
+  it("keeps another brand's tasks and revenue signals out of the context", () => {
+    const context = buildBrandOperatingContext({
+      brandId: "brand-2clouds-demo",
+      brands: clientBrands,
+      brandBrains,
+      brandTasks: [
+        ...brandTasks,
+        {
+          id: "brand-task-other",
+          brandId: "brand-other-demo",
+          title: "Other brand task",
+          status: "queued",
+          ownerUserId: currentUser.id,
+          expectedOutcome: "This should not appear in the 2clouds demo brand app.",
+          revenueSignalIds: ["signal-other"],
+          seniorMemberActivityIds: [],
+        },
+      ],
+      revenueSignals: [
+        ...revenueSignals,
+        {
+          id: "signal-other",
+          brandId: "brand-other-demo",
+          type: "lead",
+          label: "Other brand lead",
+          value: "This signal belongs to another brand.",
+          confidence: "high",
+          observedAt: "2026-05-01T13:00:00.000Z",
+        },
+      ],
+      seniorMemberActivities,
+      users,
+    });
+
+    expect(context.tasks.some((task) => task.brandId !== context.brand.id)).toBe(
+      false,
+    );
+    expect(
+      context.revenueSignals.some(
+        (signal) => signal.brandId !== context.brand.id,
+      ),
+    ).toBe(false);
   });
 });

@@ -4,6 +4,8 @@ import {
   brandTasks,
   clientBrands,
   revenueSignals,
+  currentUser,
+  reviewerUser,
   seniorMemberActivities,
 } from "@/lib/seed";
 import { buildBrandOperatingContext } from "@/lib/brands";
@@ -23,6 +25,7 @@ export async function GET(
         brandTasks,
         revenueSignals,
         seniorMemberActivities,
+        users: [currentUser, reviewerUser],
       }),
     );
   } catch (error) {
