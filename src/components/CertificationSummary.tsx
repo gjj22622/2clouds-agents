@@ -9,27 +9,33 @@ export function CertificationSummary({
     <section className="section">
       <div className="section-header">
         <div>
-          <div className="eyebrow">60 point certification</div>
+          <div className="eyebrow">Certification</div>
           <h2>60 分認證進度</h2>
-          <p>以 reviewer 完成品管的任務點數計算正式進度。</p>
+          <p>達成 60 分即具備數位行銷服務交付能力。進度以已品管點數計算。</p>
         </div>
-        <span className="badge reviewed">{progress.percent}%</span>
+        <div style={{ textAlign: "right" }}>
+          <span className="badge reviewed" style={{ fontSize: "16px", padding: "6px 12px" }}>
+            {progress.percent}%
+          </span>
+        </div>
       </div>
+      
       <div className="progress-track" aria-label="Certification progress">
         <div className="progress-bar" style={{ width: `${progress.percent}%` }} />
       </div>
-      <div className="metric-grid" style={{ marginTop: 16 }}>
+
+      <div className="metric-grid" style={{ marginTop: 24 }}>
         <div className="metric">
-          <span className="metric-value">{progress.reviewedPoints}</span>
           <span className="metric-label">已品管點數</span>
+          <span className="metric-value">{progress.reviewedPoints}</span>
         </div>
-        <div className="metric">
-          <span className="metric-value">{progress.submittedPoints}</span>
+        <div className="metric" style={{ borderLeftColor: "var(--sy-blue)" }}>
           <span className="metric-label">已送出點數</span>
+          <span className="metric-value">{progress.submittedPoints}</span>
         </div>
-        <div className="metric">
-          <span className="metric-value">{progress.targetPoints}</span>
+        <div className="metric" style={{ borderLeftColor: "var(--sy-line)" }}>
           <span className="metric-label">認證門檻</span>
+          <span className="metric-value">{progress.targetPoints}</span>
         </div>
       </div>
     </section>
