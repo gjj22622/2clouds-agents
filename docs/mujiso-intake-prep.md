@@ -2,6 +2,11 @@
 
 本文件是木酢寵物達人品牌導入的資料收集格式，對應 `docs/brand-app-isolation-spec.md` 中定義的 7 個最小資料包。**所有欄位為空白佔位，等 Jacky 確認導入時間後，由 Sophia 主導、藝嘉確認合規邊界後填寫。**
 
+> ⚠️ **2026-05-01 更新：** 木酢品牌資料已從原始文件（muzopet-brain.skill / 人物完整檔案 / v4 三支 Agent 設計書）完成第一版映射。
+> 請先閱讀 **[docs/mujiso-brand-pack.md](./mujiso-brand-pack.md)**，該文件已包含：
+> BrandBrain 完整規格、BrandTask 清單、RevenueSignal 初始訊號、ReviewerRule、BrandSkill 分解、以及新人進場須知。
+> 本文件保留為資料收集模板（供 Sophia 正式填寫後匯入平台用）。
+
 ---
 
 ## 導入前提確認

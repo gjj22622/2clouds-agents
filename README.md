@@ -44,6 +44,7 @@
 - [Brand Onboarding Workflow](docs/brand-onboarding-workflow.md) — 新人進入品牌日常任務的完整流程（含 Day 1 Checklist）← **新人必讀**
 - [品牌導入 Checklist 模板](docs/brand-intake-checklist.md) — 任何新品牌導入時的通用問卷模板
 - [木酢寵物達人導入準備格式](docs/mujiso-intake-prep.md) — 木酢品牌專用資料收集佔位格式（含初探會議問題清單）
+- [木酢寵物達人 Brand Pack 映射](docs/mujiso-brand-pack.md) — BrandBrain / BrandTask / RevenueSignal / ReviewerRule / BrandSkill 結構化規格 ← **品牌導入必讀**
 - [木酢寵物達人數據整合架構](docs/muzopet-data-architecture.md) — 官網、蝦皮、GA、廣告與 LINE 數據如何回寫成 Brand App 營運訊號
 
 ### 工程開發
