@@ -150,7 +150,7 @@ export type SeniorMemberActivity = {
   id: string;
   brandId: string;
   userId: string;
-  activityType: "strategy" | "review" | "client_contact" | "handoff";
+  activityType: "strategy" | "review" | "client_contact" | "handoff" | "note";
   summary: string;
   relatedBrandTaskIds: string[];
   createdAt: string;
