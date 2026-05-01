@@ -98,10 +98,17 @@ needs_revision → in_progress → submitted
 - [ ] 新人收到「需修稿」時，可以看到 reviewer note，並可以把任務拉回「進行中」。
 - [ ] 任務處於「已品管」或「已送出」（等待 reviewer）時，新人沒有可操作的按鈕。
 
-**Reviewer Flow（資料層完整；UI 由後續切片補）：**
-- [ ] Reviewer 能從「已送出」推進到「已品管」。
-- [ ] Reviewer 能從「已送出」退回到「需修稿」，並附上 reviewerNote。
-- [ ] `getAvailableActorTransitions` 依角色回傳正確的可操作狀態列表。
+**Reviewer Flow（資料層與判斷規範完整；Reviewer UI 由後續切片補）：**
+
+> 判斷框架的完整規格見 [docs/reviewer-workflow.md](./reviewer-workflow.md)。
+
+- [ ] Reviewer 能從「已送出」推進到「已品管」（`review_created` trace 自動產生）。
+- [ ] Reviewer 能從「已送出」退回到「需修稿」（`revision_requested` trace 自動產生），並附上 reviewerNote。
+- [ ] ReviewerNote 必須指出面向（structure / brand / compliance）、具體問題、修改方向；空白 note 不應允許退修操作。
+- [ ] `getAvailableActorTransitions("submitted", "reviewer")` 回傳 `["reviewed", "needs_revision"]`。
+- [ ] `getAvailableActorTransitions("not_started" | "in_progress", "reviewer")` 回傳 `[]`（reviewer 不能操作未送出的任務）。
+- [ ] 退修循環（`needs_revision → in_progress → submitted → reviewed`）的完整 trace log 能被回放：actorId 正確區分新人與 reviewer。
+- [ ] 60 分認證進度在 `needs_revision` 狀態時不計入 `submittedPoints`，確保退修不會提前刷分。
 
 **Trace Log：**
 - [ ] 每次狀態改變都產生一條 TraceLog，記錄 assignmentId、actorId、fromStatus、toStatus、createdAt。
