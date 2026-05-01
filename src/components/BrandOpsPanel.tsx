@@ -1,37 +1,8 @@
 "use client";
 
-import { useState, useTransition, type CSSProperties, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { BrandTask, BrandTaskStatus } from "@/lib/domain";
-
-const controlStyle: CSSProperties = {
-  border: "1px solid var(--line)",
-  borderRadius: 6,
-  color: "var(--text)",
-  font: "inherit",
-  minHeight: 40,
-  padding: "8px 12px",
-  width: "100%",
-};
-
-const textareaStyle: CSSProperties = {
-  ...controlStyle,
-  minHeight: 88,
-  resize: "vertical",
-};
-
-const fieldStyle: CSSProperties = {
-  display: "grid",
-  gap: 8,
-};
-
-const labelStyle: CSSProperties = {
-  color: "var(--sy-gray)",
-  fontSize: 12,
-  fontWeight: 700,
-  letterSpacing: "0.03em",
-  textTransform: "uppercase",
-};
 
 const statusLabels: Record<BrandTaskStatus, string> = {
   queued: "排隊中",
@@ -64,6 +35,8 @@ export function BrandOpsPanel({
   const [confidence, setConfidence] = useState<RevenueConfidence>("medium");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const isLoading = isPending || isSubmitting;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -112,7 +85,7 @@ export function BrandOpsPanel({
         return;
       }
 
-      setMessage("已寫入品牌操作，頁面會同步更新最新狀態。");
+      setMessage("已成功寫入操作，頁面正在更新...");
 
       if (kind === "task_note") {
         setNote("");
@@ -131,7 +104,7 @@ export function BrandOpsPanel({
       setError(
         submissionError instanceof Error
           ? submissionError.message
-          : "寫入失敗",
+          : "系統連線失敗",
       );
     } finally {
       setIsSubmitting(false);
@@ -139,204 +112,218 @@ export function BrandOpsPanel({
   }
 
   return (
-    <section className="section">
-      <div className="eyebrow">Brand Ops</div>
-      <h2>營運寫入</h2>
-      <p>
-        這裡可以直接把木酢品牌的任務狀態、操作 note 與 revenue signal 寫進平台。
+    <section className="section isolated-section">
+      <div className="eyebrow">Brand Ops Console</div>
+      <h2 style={{ marginBottom: 8 }}>營運快速操作</h2>
+      <p style={{ fontSize: 14, marginBottom: 24 }}>
+        直接更新木酢品牌的任務進度、操作備註或捕捉即時營收訊號。
       </p>
 
-      <form onSubmit={handleSubmit} className="stack" style={{ gap: 16 }}>
-        <label style={fieldStyle}>
-          <span style={labelStyle}>操作類型</span>
-          <select
-            onChange={(event) => setKind(event.target.value as OperationKind)}
-            style={controlStyle}
-            value={kind}
+      {/* Operation Kind Switcher */}
+      <div className="button-row" style={{ marginBottom: 24, padding: 4, background: "var(--sy-paper)", borderRadius: 8 }}>
+        {[
+          { id: "task_status", label: "任務進度" },
+          { id: "task_note", label: "操作備註" },
+          { id: "revenue_signal", label: "營收訊號" },
+        ].map((item) => (
+          <button
+            key={item.id}
+            className={`secondary-button ${kind === item.id ? "active" : ""}`}
+            onClick={() => {
+              setKind(item.id as OperationKind);
+              setError(null);
+              setMessage(null);
+            }}
+            style={{
+              flex: 1,
+              border: "none",
+              background: kind === item.id ? "white" : "transparent",
+              boxShadow: kind === item.id ? "var(--shadow-sm)" : "none",
+              fontSize: 13,
+              minHeight: 32,
+            }}
+            type="button"
           >
-            <option value="task_status">變更任務狀態</option>
-            <option value="task_note">留下任務 note</option>
-            <option value="revenue_signal">新增 revenue signal</option>
-          </select>
-        </label>
+            {item.label}
+          </button>
+        ))}
+      </div>
 
-        <label style={fieldStyle}>
-          <span style={labelStyle}>任務</span>
+      <form onSubmit={handleSubmit} className="form-stack">
+        <div className="form-field">
+          <label className="form-label" htmlFor="taskId">
+            關聯任務 {kind !== "revenue_signal" && <span style={{ color: "var(--danger)" }}>*</span>}
+          </label>
           <select
+            className="form-control"
+            disabled={isLoading}
+            id="taskId"
             onChange={(event) => setTaskId(event.target.value)}
             required={kind !== "revenue_signal"}
-            style={controlStyle}
             value={taskId}
           >
-            <option value="">不綁定任務</option>
+            <option value="">{kind === "revenue_signal" ? "可選：關聯至特定任務" : "請選擇任務"}</option>
             {tasks.map((task) => (
               <option key={task.id} value={task.id}>
-                {task.title} · {statusLabels[task.status]}
+                {statusLabels[task.status]} · {task.title}
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
         {kind === "task_status" && (
-          <>
-            <label style={fieldStyle}>
-              <span style={labelStyle}>目標狀態</span>
+          <div className="form-stack">
+            <div className="form-field">
+              <label className="form-label" htmlFor="targetStatus">目標狀態</label>
               <select
+                className="form-control"
+                disabled={isLoading}
+                id="targetStatus"
                 onChange={(event) =>
                   setStatus(event.target.value as BrandTaskStatus)
                 }
-                style={controlStyle}
                 value={status}
               >
                 <option value="queued">排隊中</option>
                 <option value="in_progress">進行中</option>
-                <option value="reviewing">審核中</option>
-                <option value="done">完成</option>
+                <option value="reviewing">待審核</option>
+                <option value="done">已完成</option>
               </select>
-            </label>
-            <label style={fieldStyle}>
-              <span style={labelStyle}>補充 note（選填）</span>
+            </div>
+            <div className="form-field">
+              <label className="form-label" htmlFor="statusNote">補充說明</label>
               <textarea
+                className="form-control"
+                disabled={isLoading}
+                id="statusNote"
                 onChange={(event) => setNote(event.target.value)}
-                placeholder="例如：已完成素材確認，等待藝嘉確認下一步。"
-                style={textareaStyle}
+                placeholder="例如：已完成初步排版，等待素材中..."
                 value={note}
               />
-            </label>
-          </>
+            </div>
+          </div>
         )}
 
         {kind === "task_note" && (
-          <label style={fieldStyle}>
-            <span style={labelStyle}>操作 note</span>
+          <div className="form-field">
+            <label className="form-label" htmlFor="taskNote">
+              操作內容 <span style={{ color: "var(--danger)" }}>*</span>
+            </label>
             <textarea
+              className="form-control"
+              disabled={isLoading}
+              id="taskNote"
               onChange={(event) => setNote(event.target.value)}
-              placeholder="例如：已補上商品頁的安全說明與使用場景。"
+              placeholder="請輸入本次操作的具體重點..."
               required
-              style={textareaStyle}
               value={note}
             />
-          </label>
+          </div>
         )}
 
         {kind === "revenue_signal" && (
-          <div className="stack" style={{ gap: 12 }}>
-            <div
-              style={{
-                display: "grid",
-                gap: 12,
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              }}
-            >
-              <label style={fieldStyle}>
-                <span style={labelStyle}>訊號類型</span>
+          <div className="form-stack">
+            <div style={{ display: "grid", gap: 16, gridTemplateColumns: "1fr 1fr" }}>
+              <div className="form-field">
+                <label className="form-label" htmlFor="signalType">訊號類型</label>
                 <select
+                  className="form-control"
+                  disabled={isLoading}
+                  id="signalType"
                   onChange={(event) =>
                     setSignalType(event.target.value as RevenueSignalType)
                   }
-                  style={controlStyle}
                   value={signalType}
                 >
-                  <option value="lead">lead</option>
-                  <option value="conversion">conversion</option>
-                  <option value="retention">retention</option>
-                  <option value="upsell">upsell</option>
+                  <option value="lead">Lead</option>
+                  <option value="conversion">Conversion</option>
+                  <option value="retention">Retention</option>
+                  <option value="upsell">Upsell</option>
                 </select>
-              </label>
-
-              <label style={fieldStyle}>
-                <span style={labelStyle}>信心度</span>
+              </div>
+              <div className="form-field">
+                <label className="form-label" htmlFor="confidence">信心度</label>
                 <select
+                  className="form-control"
+                  disabled={isLoading}
+                  id="confidence"
                   onChange={(event) =>
                     setConfidence(event.target.value as RevenueConfidence)
                   }
-                  style={controlStyle}
                   value={confidence}
                 >
-                  <option value="low">low</option>
-                  <option value="medium">medium</option>
-                  <option value="high">high</option>
+                  <option value="low">低 (Low)</option>
+                  <option value="medium">中 (Medium)</option>
+                  <option value="high">高 (High)</option>
                 </select>
-              </label>
+              </div>
             </div>
 
-            <label style={fieldStyle}>
-              <span style={labelStyle}>訊號標題</span>
+            <div className="form-field">
+              <label className="form-label" htmlFor="signalLabel">
+                訊號摘要 <span style={{ color: "var(--danger)" }}>*</span>
+              </label>
               <input
+                className="form-control"
+                disabled={isLoading}
+                id="signalLabel"
                 onChange={(event) => setSignalLabel(event.target.value)}
-                placeholder="例如：會員喚醒進站點擊回升"
+                placeholder="例如：官網流量點擊回升"
                 required
-                style={controlStyle}
                 value={signalLabel}
               />
-            </label>
+            </div>
 
-            <label style={fieldStyle}>
-              <span style={labelStyle}>訊號內容</span>
+            <div className="form-field">
+              <label className="form-label" htmlFor="signalValue">
+                具體訊號內容 <span style={{ color: "var(--danger)" }}>*</span>
+              </label>
               <textarea
+                className="form-control"
+                disabled={isLoading}
+                id="signalValue"
                 onChange={(event) => setSignalValue(event.target.value)}
-                placeholder="例如：最近一週有明顯回訪，適合推會員喚醒與加購包。"
+                placeholder="例如：LINE 推播後進站人數提升 20%，適合推廣回購包..."
                 required
-                style={textareaStyle}
                 value={signalValue}
               />
-            </label>
+            </div>
           </div>
         )}
 
-        {error && (
-          <div
-            style={{
-              background: "#fceceb",
-              border: "1px solid #f3b4ae",
-              borderRadius: 6,
-              color: "var(--danger)",
-              fontSize: 14,
-              fontWeight: 600,
-              padding: "10px 12px",
-            }}
-          >
-            {error}
-          </div>
-        )}
+        <div className="stack" style={{ gap: 12, marginTop: 8 }}>
+          {error && <div className="feedback error">{error}</div>}
+          {message && <div className="feedback success">{message}</div>}
 
-        {message && (
-          <div
-            style={{
-              background: "var(--sy-cloud)",
-              border: "1px solid var(--sy-line)",
-              borderRadius: 6,
-              color: "var(--sy-deep)",
-              fontSize: 14,
-              fontWeight: 600,
-              padding: "10px 12px",
-            }}
-          >
-            {message}
+          <div className="button-row">
+            <button
+              className="button"
+              disabled={isLoading}
+              style={{ flex: 2 }}
+              type="submit"
+            >
+              {isLoading ? "處理中..." : "確認送出"}
+            </button>
+            <button
+              className="secondary-button"
+              disabled={isLoading}
+              onClick={() => {
+                setTaskId(tasks[0]?.id ?? "");
+                setStatus("in_progress");
+                setNote("");
+                setSignalType("lead");
+                setSignalLabel("");
+                setSignalValue("");
+                setConfidence("medium");
+                setError(null);
+                setMessage(null);
+              }}
+              style={{ flex: 1 }}
+              type="button"
+            >
+              重置
+            </button>
           </div>
-        )}
-
-        <div className="button-row">
-          <button className="button" disabled={isPending || isSubmitting} type="submit">
-            {isPending || isSubmitting ? "送出中…" : "送出寫入"}
-          </button>
-          <button
-            className="secondary-button"
-            onClick={() => {
-              setTaskId(tasks[0]?.id ?? "");
-              setStatus("in_progress");
-              setNote("");
-              setSignalType("lead");
-              setSignalLabel("");
-              setSignalValue("");
-              setConfidence("medium");
-              setError(null);
-              setMessage(null);
-            }}
-            type="button"
-          >
-            重設
-          </button>
         </div>
       </form>
     </section>
