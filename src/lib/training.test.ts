@@ -7,6 +7,7 @@ import {
   canTransitionTaskStatus,
   createStatusTraceLog,
   getAvailableActorTransitions,
+  validateRevisionReviewerNote,
 } from "./training";
 
 const tasks = [
@@ -295,14 +296,15 @@ describe("applyReviewerReviewDecision", () => {
       },
       reviewerId: "reviewer-01",
       decision: "needs_revision",
-      reviewerNote: "CTA does not match the brand brain.",
+      reviewerNote:
+        "[Brand] CTA does not match the brand brain. Please revise it to use the channel rules from the brand pack.",
       reviewerScore: 52,
       now: new Date("2026-05-01T10:00:00.000Z"),
     });
 
     expect(result.assignment.status).toBe("needs_revision");
     expect(result.assignment.reviewerNote).toBe(
-      "CTA does not match the brand brain.",
+      "[Brand] CTA does not match the brand brain. Please revise it to use the channel rules from the brand pack.",
     );
     expect(result.assignment.reviewerScore).toBe(52);
     expect(result.assignment.reviewedAt).toBe("2026-05-01T10:00:00.000Z");
@@ -323,5 +325,60 @@ describe("applyReviewerReviewDecision", () => {
         decision: "reviewed",
       }),
     ).toThrow("Reviewer can only review submitted assignments");
+  });
+
+  it("rejects needs_revision without reviewer feedback", () => {
+    expect(() =>
+      applyReviewerReviewDecision({
+        assignment: {
+          id: "a4",
+          taskId: "task-b",
+          userId: "u1",
+          status: "submitted",
+        },
+        reviewerId: "reviewer-01",
+        decision: "needs_revision",
+      }),
+    ).toThrow("Revision reviewerNote is required");
+  });
+
+  it("rejects needs_revision feedback that has no review dimension", () => {
+    expect(() =>
+      applyReviewerReviewDecision({
+        assignment: {
+          id: "a5",
+          taskId: "task-b",
+          userId: "u1",
+          status: "submitted",
+        },
+        reviewerId: "reviewer-01",
+        decision: "needs_revision",
+        reviewerNote: "The draft is unclear. Please revise the opening and CTA.",
+      }),
+    ).toThrow("must name at least one review dimension");
+  });
+});
+
+describe("validateRevisionReviewerNote", () => {
+  it("accepts a reviewer note with dimension, concrete issue, and revision direction", () => {
+    const result = validateRevisionReviewerNote(
+      "[Structure] Missing escalation judgment. Please add at least one question that should be raised to Jacky or Sophia.",
+    );
+
+    expect(result.valid).toBe(true);
+    expect(result.dimensions).toEqual(["structure"]);
+    expect(result.reasons).toEqual([]);
+  });
+
+  it("reports missing action direction", () => {
+    const result = validateRevisionReviewerNote(
+      "[Compliance] The draft uses guaranteed outcome language.",
+    );
+
+    expect(result.valid).toBe(false);
+    expect(result.reasons).toContain(
+      "Revision reviewerNote must include an actionable revision direction.",
+    );
+    expect(result.dimensions).toEqual(["compliance"]);
   });
 });

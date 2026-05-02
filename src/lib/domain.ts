@@ -58,6 +58,8 @@ export type TrainingTaskAssignment = {
 
 export type ReviewDecision = "reviewed" | "needs_revision";
 
+export type ReviewDimension = "structure" | "brand" | "compliance";
+
 export type DecisionPrompt = {
   taskId: string;
   problemFraming: string;
