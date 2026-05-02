@@ -3,6 +3,7 @@ import type {
   DecisionPrompt,
   NewcomerDashboard,
   ReviewDecision,
+  ReviewDimension,
   Role,
   TaskStatus,
   TraceLog,
@@ -10,6 +11,16 @@ import type {
   TrainingTaskAssignment,
   User,
 } from "./domain";
+
+const REVIEW_NOTE_DIMENSION_PATTERNS: Record<ReviewDimension, RegExp> = {
+  structure: /\bstructure\b|\[structure\]|【structure】|結構|格式|輸出項目/i,
+  brand: /\bbrand\b|\[brand\]|【brand】|品牌|語氣|品牌腦/i,
+  compliance:
+    /\bcompliance\b|\[compliance\]|【compliance】|合規|承諾|敏感|法規|風險詞/i,
+};
+
+const REVIEW_NOTE_DIRECTION_PATTERN =
+  /建議|請|需要|修改|調整|改為|補上|移除|對照|revise|change|update|add|remove/i;
 
 // All valid task status transitions, independent of actor role.
 const VALID_TRANSITIONS = new Set<string>([
@@ -51,6 +62,54 @@ export function getAvailableActorTransitions(
   role: Role,
 ): TaskStatus[] {
   return ACTOR_TRANSITIONS[role]?.[status] ?? [];
+}
+
+export function getReviewerNoteDimensions(
+  reviewerNote: string,
+): ReviewDimension[] {
+  return Object.entries(REVIEW_NOTE_DIMENSION_PATTERNS)
+    .filter(([, pattern]) => pattern.test(reviewerNote))
+    .map(([dimension]) => dimension as ReviewDimension);
+}
+
+export function validateRevisionReviewerNote(reviewerNote?: string): {
+  valid: boolean;
+  reasons: string[];
+  dimensions: ReviewDimension[];
+} {
+  const normalizedNote =
+    typeof reviewerNote === "string" ? reviewerNote.trim() : "";
+  const reasons: string[] = [];
+
+  if (!normalizedNote) {
+    return {
+      valid: false,
+      reasons: ["Revision reviewerNote is required."],
+      dimensions: [],
+    };
+  }
+
+  const dimensions = getReviewerNoteDimensions(normalizedNote);
+
+  if (dimensions.length === 0) {
+    reasons.push(
+      "Revision reviewerNote must name at least one review dimension: structure, brand, or compliance.",
+    );
+  }
+
+  if (normalizedNote.length < 24) {
+    reasons.push("Revision reviewerNote must describe a concrete issue.");
+  }
+
+  if (!REVIEW_NOTE_DIRECTION_PATTERN.test(normalizedNote)) {
+    reasons.push("Revision reviewerNote must include an actionable revision direction.");
+  }
+
+  return {
+    valid: reasons.length === 0,
+    reasons,
+    dimensions,
+  };
 }
 
 export function createStatusTraceLog(params: {
@@ -135,6 +194,14 @@ export function applyReviewerReviewDecision(params: {
     (params.reviewerScore < 0 || params.reviewerScore > 100)
   ) {
     throw new Error("Reviewer score must be between 0 and 100");
+  }
+
+  if (params.decision === "needs_revision") {
+    const noteValidation = validateRevisionReviewerNote(params.reviewerNote);
+
+    if (!noteValidation.valid) {
+      throw new Error(noteValidation.reasons.join(" "));
+    }
   }
 
   const now = params.now ?? new Date();
