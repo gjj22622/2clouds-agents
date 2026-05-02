@@ -14,6 +14,7 @@ import { AgentTeamPanel } from "@/components/AgentTeamPanel";
 import { ActionProposalList } from "@/components/ActionProposalList";
 import { ApprovalQueue } from "@/components/ApprovalQueue";
 import { DailyOperatingReport } from "@/components/DailyOperatingReport";
+import { buildMuzopetAgentTeamCockpit } from "@/lib/agent-team";
 import {
   clientBrands,
   currentUser,
@@ -30,6 +31,7 @@ import type {
 
 const users = [currentUser, reviewerUser];
 const MUZO_BRAND_ID = "brand-muzopet";
+const muzopetAgentTeamCockpit = buildMuzopetAgentTeamCockpit();
 
 const stageLabels: Record<BrandOperatingStage, string> = {
   onboarding: "導入中",
@@ -844,15 +846,21 @@ function MuzoBrandWorkspace() {
       <main className={`brand-app-main ${isFrozen ? "frozen" : ""}`}>
         {activeView === "cockpit" ? (
           <div className="stack" style={{ gap: "32px" }}>
-            <RevenueGoalPanel />
-            <AgentTeamPanel />
+            <RevenueGoalPanel
+              goal={muzopetAgentTeamCockpit.revenueGoal}
+              progress={muzopetAgentTeamCockpit.progress}
+            />
+            <AgentTeamPanel agentTeam={muzopetAgentTeamCockpit.agentTeam} />
             <div className="cockpit-grid">
               <div className="stack" style={{ gap: "32px" }}>
-                <ActionProposalList />
-                <DailyOperatingReport />
+                <ActionProposalList proposals={muzopetAgentTeamCockpit.actionProposals} />
+                <DailyOperatingReport report={muzopetAgentTeamCockpit.dailyOperatingReport} />
               </div>
               <aside>
-                <ApprovalQueue />
+                <ApprovalQueue
+                  proposals={muzopetAgentTeamCockpit.actionProposals}
+                  resourceRequests={muzopetAgentTeamCockpit.resourceRequests}
+                />
               </aside>
             </div>
           </div>
