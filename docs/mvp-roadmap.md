@@ -29,6 +29,36 @@
 
 補上双云日常營運需要的完整流程。
 
+### Phase 2A：木酢自主營運 Agent Team（當前優先項）
+
+品牌：木酢寵物達人（試點）
+
+規格參考：[木酢自主營運 Agent Team Spec](./muzopet-autonomous-agent-team-spec.md)
+
+範圍：
+
+- RevenueGoal：Jacky 設定月度營收目標
+- Agent Team cockpit：Revenue Commander / Member Reactivation / Content & Offer / Compliance & Brand Reviewer / Data Attribution / Resource Request
+- ActionProposal：riskLevel + expected_revenue_impact + approval 路由
+- ApprovalQueue：分 Jacky / 藝嘉 / Sophia / 政澔
+- ResourceRequest：資源請求指派追蹤
+- DailyOperatingReport：每日 Agent 執行摘要
+- Compliance 紅線攔截（醫療宣稱 / 退訂戶 / 折扣承諾等）
+
+Acceptance Criteria 見 `docs/muzopet-autonomous-agent-team-spec.md` Section 9。
+
+新增 Domain Types（Codex 負責）：
+
+- `RevenueGoal`
+- `ActionProposal`
+- `ResourceRequest`
+- `DailyOperatingReport`
+- `AgentRun`
+- `ComplianceFlag`
+- `ApprovalDecision`
+
+### Phase 2B：營運管理完整閉環
+
 範圍：
 
 - 客戶導入 Stage 0-9

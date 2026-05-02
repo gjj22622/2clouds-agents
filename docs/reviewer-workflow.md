@@ -191,3 +191,60 @@ needs_revision 狀態是訓練閉環中訓練價值最高的節點之一。
 | 4 品管與修稿 | 退件分析與修稿 | 看新人是否真正理解退件原因，修稿依據是否對應品牌腦 |
 | 5 客戶服務 | 升級時機判斷 | 邏輯：升級判斷是否正確；不該升級的有沒有自己處理 |
 | 6 60 分認證 | 完整模擬任務 | Final：整體可交付；trace log 完整；升級時機判斷準確 |
+
+---
+
+## 8. Phase 2A：Approval Gate 規則（Agent Team 提案審查）
+
+本節補充 Phase 2A Agent Team 的提案進入人工審查時，藝嘉（reviewer）的操作規範。
+
+### 8.1 Approval Gate 在 Agent Team 中的位置
+
+```
+Compliance & Brand Reviewer Agent 掃描
+    ├── 🟢 pass → 進入藝嘉 review queue
+    ├── 🟡 flag → 進入藝嘉 review queue（需人工確認）
+    └── 🔴 block → 自動攔截，通知藝嘉 + 相關人員，不進入後續流程
+
+藝嘉 review：
+    ├── pass → 若 riskLevel = medium/high → 推入 Jacky approval queue
+    └── needs_revision → 提案退回 Agent，附修改說明
+
+Jacky approval（high risk / 藝嘉推入）：
+    ├── approved → 提案進入執行佇列
+    └── rejected / deferred → 提案暫停，附理由
+```
+
+### 8.2 藝嘉的 Approval Gate 操作規範
+
+**藝嘉 approve 一個 ActionProposal 前，必須確認：**
+
+1. **品牌語氣**：文案語氣符合 BrandBrain.voice，無禁忌詞
+2. **合規邊界**：Compliance Agent 的 flag 已被解決（或確認無風險）
+3. **名單安全**（若涉及發送）：退訂戶 / 毛孩過世戶黑名單已核對
+4. **適用對象清晰**（若涉及商品）：商品適用對象在文案中清楚標明
+5. **發送頻率**：確認不超過品牌頻道規則上限（LINE 每人每月 ≤ 2 次）
+
+**藝嘉 reject / needs_revision 時，必須附上：**
+
+- 哪個維度有問題（brand / compliance / applicability / blacklist）
+- 具體問題描述（引用提案文字）
+- 修改方向（可執行的指引）
+
+格式與訓練任務 reviewer note 相同：
+
+```
+[問題維度] 具體問題。建議：修改方向。
+```
+
+### 8.3 木酢品牌的特殊 Approval 規則
+
+以下情況是木酢品牌的強制 approval 規則，不可省略：
+
+| 情況 | 必須經過誰 | 原因 |
+|---|---|---|
+| 任何含「防蚊」的文案 | 藝嘉確認 + Jacky 最終 | 商品適用對象容易混用，合規風險 |
+| 含毛孩健康場景的文案（皮膚、過敏、高齡）| 藝嘉確認 | 醫療宣稱邊界，不允許機器放行 |
+| 任何促銷型文案（折扣 / 限時 / 贈品）| Jacky | 陳總對促銷感敏感，老闆決策 |
+| 農曆節（清明 / 中元）促銷訊息 | Jacky + Sophia | 文化衝突風險，需要雙確認 |
+| 新通路或新商品線的首次發送 | Jacky | 策略方向改變，需老闆確認 |

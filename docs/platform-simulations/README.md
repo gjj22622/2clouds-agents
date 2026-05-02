@@ -46,4 +46,5 @@
 | 日期 | 文件 | 範圍 | 重點 |
 |---|---|---|---|
 | 2026-05-02 | [木酢寵物達人三角色平台運作模擬](./muzopet-three-role-platform-simulation-2026-05-02.md) | 新人 / 藝嘉 / Jacky | 會員喚醒任務、藝嘉退修、Jacky 高風險決策 gate |
+| 2026-05-02 | [木酢自主 Agent Team 執行模擬](./muzopet-autonomous-agent-team-simulation-2026-05-02.md) | Agent Team / Jacky / 藝嘉 / Sophia | 月度目標拆解、會員喚醒提案、防蚊紅線攔截、ResourceRequest、Jacky approval gate、DailyOperatingReport |
 

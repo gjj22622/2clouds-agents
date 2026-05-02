@@ -83,6 +83,36 @@
 - 品牌專屬 task skills
 - 品牌資料完整度
 
+## 5A. 品牌自主營運 Agent Team（Phase 2A）
+
+路由：`/brands/[id]/agent-team`
+
+依 `docs/muzopet-autonomous-agent-team-spec.md` 定義，每個品牌可配置一套獨立的 Agent Team。
+
+模組組成：
+
+- Revenue Goal：目標設定 + 缺口進度
+- Agent Team 狀態：6 個 Agent 各自的今日任務 + 狀態（running / blocked / needs_approval）
+- Action Proposals：提案清單，含 riskLevel + expected_revenue_impact + approval 狀態
+- Approval Queue：分 Jacky / 藝嘉 / Sophia / 政澔 的待辦
+- Resource Request：對人類成員的資源請求追蹤
+- Daily Operating Report：今日執行摘要、blockers、明日行動
+
+Agent 清單：
+
+- Revenue Commander Agent：拆目標 + 策略方向 + 日報
+- Member Reactivation Agent：RFM 分群 + 喚醒提案
+- Content & Offer Agent：文案草稿 + 優惠組合建議
+- Compliance & Brand Reviewer Agent：紅線掃描 + 🟢🟡🔴 評估
+- Data Attribution Agent：數據歸因 + 週報草稿
+- Resource Request Agent：人類協作請求彙整
+
+Approval 規則：
+- low riskLevel → 藝嘉 review
+- medium riskLevel → 藝嘉 review + Jacky deferred
+- high riskLevel → Jacky approval 必要
+- 紅線命中（醫療 / 退訂戶 / 折扣承諾）→ 自動 block + 通知藝嘉
+
 ## 6. 內容工廠
 
 路由：`/content`
