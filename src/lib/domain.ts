@@ -290,6 +290,162 @@ export type BrandOperatingContext = {
   seniorMemberActivities: SeniorMemberActivity[];
 };
 
+// ─── Brand Revenue Operating Agent Team ───────────────────────────────────────
+
+export type RevenueGoalStatus = "draft" | "active" | "paused" | "completed";
+
+export type RevenueGoal = {
+  id: string;
+  brandId: string;
+  title: string;
+  targetAmount: number;
+  currentAmount: number;
+  currency: "twd";
+  periodStart: string;
+  periodEnd: string;
+  status: RevenueGoalStatus;
+  createdBy: string;
+  createdAt: string;
+};
+
+export type RevenueGoalProgress = {
+  goalId: string;
+  targetAmount: number;
+  currentAmount: number;
+  gapAmount: number;
+  percent: number;
+};
+
+export type AgentTeamOperatingMode = "mock" | "supervised" | "autonomous";
+
+export type AgentStatus = "running" | "ready" | "blocked" | "needs_approval";
+
+export type AgentTeamRole =
+  | "revenue_commander"
+  | "member_reactivation"
+  | "content_offer"
+  | "compliance_brand_reviewer"
+  | "data_attribution"
+  | "resource_request";
+
+export type AgentTeamMember = {
+  id: string;
+  role: AgentTeamRole;
+  name: string;
+  status: AgentStatus;
+  todayTask: string;
+};
+
+export type AgentTeam = {
+  id: string;
+  brandId: string;
+  goalId: string;
+  operatingMode: AgentTeamOperatingMode;
+  agents: AgentTeamMember[];
+  approvalPolicy: string;
+};
+
+export type AgentRunStatus =
+  | "queued"
+  | "running"
+  | "completed"
+  | "blocked"
+  | "needs_approval";
+
+export type AgentRun = {
+  id: string;
+  brandId: string;
+  goalId: string;
+  agentId: string;
+  status: AgentRunStatus;
+  input: string;
+  output: string;
+  proposedActionIds: string[];
+  requiredResourceRequestIds: string[];
+  createdAt: string;
+};
+
+export type RiskLevel = "low" | "medium" | "high" | "blocked";
+
+export type ApprovalRole = "yijia" | "jacky" | "sophia" | "zhenghao";
+
+export type ActionProposalStatus =
+  | "draft"
+  | "pending_compliance_review"
+  | "flagged"
+  | "blocked"
+  | "pending_approval"
+  | "approved"
+  | "rejected";
+
+export type ActionProposal = {
+  id: string;
+  brandId: string;
+  goalId: string;
+  proposedByAgentId: string;
+  title: string;
+  actionType:
+    | "line_push"
+    | "edm"
+    | "shopee_message"
+    | "content_post"
+    | "strategy_change"
+    | "data_report";
+  expectedRevenueImpact: number;
+  riskLevel: RiskLevel;
+  requiredApprovalRoles: ApprovalRole[];
+  status: ActionProposalStatus;
+  blockerReason?: string;
+};
+
+export type ResourceRequestStatus =
+  | "pending"
+  | "in_progress"
+  | "blocked"
+  | "overdue"
+  | "completed"
+  | "completed_denied";
+
+export type ResourceRequest = {
+  id: string;
+  brandId: string;
+  goalId: string;
+  requestedByAgentId: string;
+  resourceType:
+    | "customer_list"
+    | "blacklist_check"
+    | "connector_setup"
+    | "content_asset"
+    | "client_approval";
+  title: string;
+  reason: string;
+  blockerLevel: "low" | "medium" | "high";
+  ownerRole: ApprovalRole;
+  status: ResourceRequestStatus;
+  dueAt?: string;
+};
+
+export type DailyOperatingReport = {
+  id: string;
+  brandId: string;
+  goalId: string;
+  date: string;
+  revenueProgress: RevenueGoalProgress;
+  actionsTaken: string[];
+  blockers: string[];
+  resourceNeeds: string[];
+  nextActions: string[];
+};
+
+export type AgentTeamCockpit = {
+  revenueGoal: RevenueGoal;
+  progress: RevenueGoalProgress;
+  agentTeam: AgentTeam;
+  actionProposals: ActionProposal[];
+  resourceRequests: ResourceRequest[];
+  dailyOperatingReport: DailyOperatingReport;
+};
+
 // ─── Google Sheets Connector ──────────────────────────────────────────────────
 
 export type BrandSheetFieldMapping = {
