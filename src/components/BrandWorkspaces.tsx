@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -6,6 +9,11 @@ import {
 } from "@/lib/brands";
 import { brandOpsStore } from "@/lib/brand-ops-store";
 import { BrandOpsPanel } from "@/components/BrandOpsPanel";
+import { RevenueGoalPanel } from "@/components/RevenueGoalPanel";
+import { AgentTeamPanel } from "@/components/AgentTeamPanel";
+import { ActionProposalList } from "@/components/ActionProposalList";
+import { ApprovalQueue } from "@/components/ApprovalQueue";
+import { DailyOperatingReport } from "@/components/DailyOperatingReport";
 import {
   clientBrands,
   currentUser,
@@ -768,6 +776,7 @@ function GenericBrandWorkspace({ context }: { context: BrandOperatingContext }) 
 function MuzoBrandWorkspace() {
   const workspace = buildMuzoWorkspace();
   const isFrozen = workspace.brand.statusLabel === "暫停";
+  const [activeView, setActiveView] = useState<"dashboard" | "cockpit">("cockpit");
 
   return (
     <div className="brand-app-shell">
@@ -786,6 +795,21 @@ function MuzoBrandWorkspace() {
         </div>
 
         <nav className="brand-module-nav" aria-label="木酢工作區模組">
+          <button
+            className={activeView === "cockpit" ? "active" : ""}
+            onClick={() => setActiveView("cockpit")}
+            style={{ textAlign: "left", background: "none", border: "none", cursor: "pointer", width: "100%", padding: "10px 12px", fontSize: "14px", fontWeight: 600, borderRadius: "6px" }}
+          >
+            ⚡ Agent Team Cockpit
+          </button>
+          <button
+            className={activeView === "dashboard" ? "active" : ""}
+            onClick={() => setActiveView("dashboard")}
+            style={{ textAlign: "left", background: "none", border: "none", cursor: "pointer", width: "100%", padding: "10px 12px", fontSize: "14px", fontWeight: 600, borderRadius: "6px" }}
+          >
+            📊 Dashboard Overview
+          </button>
+          <div style={{ margin: "8px 0", borderTop: "1px solid var(--line)" }}></div>
           <a href="#brand-brain" className="active">
             品牌腦摘要
           </a>
@@ -818,7 +842,23 @@ function MuzoBrandWorkspace() {
       </aside>
 
       <main className={`brand-app-main ${isFrozen ? "frozen" : ""}`}>
-        <header className="brand-hero">
+        {activeView === "cockpit" ? (
+          <div className="stack" style={{ gap: "32px" }}>
+            <RevenueGoalPanel />
+            <AgentTeamPanel />
+            <div className="cockpit-grid">
+              <div className="stack" style={{ gap: "32px" }}>
+                <ActionProposalList />
+                <DailyOperatingReport />
+              </div>
+              <aside>
+                <ApprovalQueue />
+              </aside>
+            </div>
+          </div>
+        ) : (
+          <>
+            <header className="brand-hero">
           <div className="brand-hero-copy">
             <div className="eyebrow">Brand App · {workspace.brand.id}</div>
             <h1>{workspace.brand.name}</h1>
@@ -1111,6 +1151,8 @@ function MuzoBrandWorkspace() {
             }))}
           />
         </section>
+          </>
+        )}
       </main>
     </div>
   );

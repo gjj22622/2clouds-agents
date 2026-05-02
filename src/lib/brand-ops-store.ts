@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { buildBrandOperatingContext } from "./brands";
 import type {
   BrandOperatingContext,
@@ -99,8 +98,9 @@ function createActivity(params: {
   summary: string;
   relatedBrandTaskIds: string[];
 }): SeniorMemberActivity {
+  const id = `activity-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
   return {
-    id: `activity-${randomUUID()}`,
+    id,
     brandId: params.brandId,
     userId: params.userId,
     activityType: params.activityType,
@@ -281,7 +281,7 @@ export function createBrandOpsStore(): BrandOpsStore {
               : undefined;
 
           const revenueSignal: RevenueSignal = {
-            id: `signal-${randomUUID()}`,
+            id: `signal-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             brandId,
             type: operation.type,
             label: assertText(operation.label, "label", { maxLength: 120 }),
