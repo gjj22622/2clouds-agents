@@ -18,9 +18,11 @@ type RevenueConfidence = "low" | "medium" | "high";
 export function BrandOpsPanel({
   brandId,
   tasks,
+  isFrozen = false,
 }: {
   brandId: string;
   tasks: BrandTask[];
+  isFrozen?: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -112,7 +114,7 @@ export function BrandOpsPanel({
   }
 
   return (
-    <section className="section isolated-section">
+    <section className={`section isolated-section ${isFrozen ? "frozen" : ""}`}>
       <div className="eyebrow">Brand Ops Console</div>
       <h2 style={{ marginBottom: 8 }}>營運快速操作</h2>
       <p style={{ fontSize: 14, marginBottom: 24 }}>
@@ -298,15 +300,15 @@ export function BrandOpsPanel({
           <div className="button-row">
             <button
               className="button"
-              disabled={isLoading}
+              disabled={isLoading || isFrozen}
               style={{ flex: 2 }}
               type="submit"
             >
-              {isLoading ? "處理中..." : "確認送出"}
+              {isFrozen ? "品牌已暫停" : isLoading ? "處理中..." : "確認送出"}
             </button>
             <button
               className="secondary-button"
-              disabled={isLoading}
+              disabled={isLoading || isFrozen}
               onClick={() => {
                 setTaskId(tasks[0]?.id ?? "");
                 setStatus("in_progress");
