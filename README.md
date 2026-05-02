@@ -49,6 +49,7 @@
 - [品牌日報 Google Sheet Connector 規格](docs/brand-sheet-connector-spec.md) — 通用 Connector 架構、讀取 / 回填流程、木酢日報 v1 mapping、UI 同步狀態 ← **資料整合必讀**
 - [Brand / Member Lifecycle Control 規格](docs/brand-member-lifecycle-spec.md) — 品牌與人員生命週期、暫停恢復規格、任務轉派協議
 - [木酢自主營運 Agent Team 規格](docs/muzopet-autonomous-agent-team-spec.md) — Phase 2 product slice，6 Agent 架構、24h Loop、自動 vs approval 邊界、木酢紅線 ← **Phase 2 必讀**
+- [木酢 Agent Team QA & Edge Cases](docs/muzopet-agent-team-qa-and-edge-cases.md) — Approval / ResourceRequest edge cases、DailyReport 驗收規則、Manual QA script、Codex 測試建議 ← **驗收必讀**
 
 ### 工程開發
 
